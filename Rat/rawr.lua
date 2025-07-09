@@ -19,12 +19,10 @@ local mouse = player:GetMouse()
 
 local running = true
 local config = {
-    idle = false,
+    AutoIdleToggle = false,
     notify = true,
 }
 
--- Add Echo Frog/Triceratops functionality
-local tempAutoIdle = false
 local folder = "farmtool"
 local file = folder .. "/config.json"
 local isMobile = input.TouchEnabled and not input.KeyboardEnabled
@@ -59,6 +57,17 @@ local function notify(title, text, time)
         Duration = time or 3
     })
 end
+
+--// Services
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+--// Modules & Remotes
+local GetPetCooldown = ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("GetPetCooldown")
+local IdleHandler = require(ReplicatedStorage.Modules.PetServices.PetActionUserInterfaceService.PetActionsHandlers.Idle)
+
+--// Runtime Variables
+getgenv().AutoIdle = false
+getgenv().AutoIdleToggle = config.AutoIdleToggle or false
 
 local function createGui()
     local gui = Instance.new("ScreenGui")
@@ -224,9 +233,13 @@ local function createGui()
         switchButton.MouseButton1Click:Connect(function()
             state = not state
             config[name] = state
+            getgenv().AutoIdleToggle = state
             updateToggle()
             save()
             notify("Settings", text .. " " .. (state and "enabled" or "disabled"))
+            if not state then
+                getgenv().AutoIdle = false
+            end
         end)
 
         return toggleFrame
@@ -264,20 +277,78 @@ local function createGui()
     end
 
     -- Create UI elements
-    createToggle("idle", "Auto Idle", 1)
+    createToggle("AutoIdleToggle", "Auto Idle", 1)
     createToggle("notify", "Notifications", 2)
-    createButton("clear", "Clear Sprinklers", 3, function()
-        clearSprinklers()
+    createButton("shovel", "Shovel Sprinkler", 3, function()
+        local Players = game:GetService("Players")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local player = Players.LocalPlayer
+
+        local character, backpack = player.Character or player.CharacterAdded:Wait(), player:WaitForChild("Backpack")
+        local DeleteObject = ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("DeleteObject")
+
+        local function EquipShovel()
+            local equippedTool = character:FindFirstChildWhichIsA("Tool")
+            if equippedTool and equippedTool.Name == "Shovel [Destroy Plants]" then
+                return true
+            end
+            local shovel = character:FindFirstChild("Shovel [Destroy Plants]") or backpack:FindFirstChild("Shovel [Destroy Plants]")
+            if shovel then
+                shovel.Parent = character
+                player.Character.Humanoid:EquipTool(shovel)
+                return true
+            end
+            return false
+        end
+
+        local function UnequipShovel()
+            local equippedTool = character:FindFirstChildWhichIsA("Tool")
+            if equippedTool and equippedTool.Name == "Shovel [Destroy Plants]" then
+                equippedTool.Parent = backpack
+            end
+        end
+
+        local garden
+        for _, plot in pairs(workspace.Farm:GetChildren()) do
+            if plot:FindFirstChild("Important")
+                and plot.Important:FindFirstChild("Data")
+                and plot.Important.Data.Owner.Value == player.Name then
+                garden = plot
+                break
+            end
+        end
+        if not garden then 
+            notify("Error", "Garden not found")
+            return 
+        end
+
+        if not EquipShovel() then 
+            notify("Error", "Shovel not found")
+            return 
+        end
+
+        local objectsFolder = garden.Important:FindFirstChild("Objects_Physical")
+        if not objectsFolder then 
+            notify("Error", "No objects found")
+            return 
+        end
+
+        for _, model in ipairs(objectsFolder:GetChildren()) do
+            if model:IsA("Model") and string.find(model.Name, "Sprinkler") then
+                DeleteObject:FireServer(model)
+                task.wait(0.2)
+            end
+        end
+
+        UnequipShovel()
+        notify("Success", "Sprinklers cleared")
     end)
 
     -- Floating toggle button (minimized state)
     local floatingBtn = Instance.new("TextButton")
     floatingBtn.Name = "FloatingButton"
     floatingBtn.Size = UDim2.new(0, isMobile and 60 or 50, 0, isMobile and 60 or 50)
-    
-    -- Fixed position: left side, slightly above center
-    floatingBtn.Position = UDim2.new(0, 20, 0.4, 0)
-    
+    floatingBtn.Position = UDim2.new(0, 20, 0.4, 0) -- Left side, slightly above center
     floatingBtn.BackgroundColor3 = Color3.fromRGB(52, 168, 83)
     floatingBtn.BorderSizePixel = 0
     floatingBtn.Text = isMobile and "🐀" or "🌾"
@@ -424,186 +495,54 @@ local function createGui()
     return gui
 end
 
-local function findGarden()
-    local farm = workspace:FindFirstChild("Farm")
-    if not farm then return nil end
-
-    for _, plot in pairs(farm:GetChildren()) do
-        if plot:FindFirstChild("Important") and
-           plot.Important:FindFirstChild("Data") and
-           plot.Important.Data:FindFirstChild("Owner") and
-           plot.Important.Data.Owner.Value == player.Name then
-            return plot
-        end
-    end
-    return nil
-end
-
-function clearSprinklers()
-    local char = player.Character
-    if not char then
-        notify("Error", "Character not found")
-        return
-    end
-
-    local humanoid = char:FindFirstChild("Humanoid")
-    if not humanoid then
-        notify("Error", "Humanoid not found")
-        return
-    end
-
-    local backpack = player:FindFirstChild("Backpack")
-    if not backpack then
-        notify("Error", "Backpack not found")
-        return
-    end
-
-    local shovel = char:FindFirstChild("Shovel [Destroy Plants]") or
-                   backpack:FindFirstChild("Shovel [Destroy Plants]")
-
-    if not shovel then
-        notify("Error", "Shovel not found")
-        return
-    end
-
-    if shovel.Parent == backpack then
-        shovel.Parent = char
-        humanoid:EquipTool(shovel)
-        task.wait(0.4)
-    end
-
-    local garden = findGarden()
-    if not garden then
-        notify("Error", "Garden not found")
-        return
-    end
-
-    local objects = garden.Important:FindFirstChild("Objects_Physical")
-    if not objects then
-        notify("Error", "No objects found")
-        return
-    end
-
-    local gameEvents = storage:FindFirstChild("GameEvents")
-    if not gameEvents then
-        notify("Error", "Game events not found")
-        return
-    end
-
-    local deleteEvent = gameEvents:FindFirstChild("DeleteObject")
-    if not deleteEvent then
-        notify("Error", "Delete event not found")
-        return
-    end
-
-    local count = 0
-
-    for _, obj in pairs(objects:GetChildren()) do
-        if obj:IsA("Model") and obj.Name and obj.Name:find("Sprinkler") then
-            local success = pcall(function()
-                deleteEvent:FireServer(obj)
-            end)
-            if success then
-                count = count + 1
+--// Auto Idle for Moon Cats
+task.spawn(function()
+    while running do
+        if getgenv().AutoIdle then
+            for _, v in ipairs(workspace.PetsPhysical:GetChildren()) do
+                if v:IsA("BasePart") and v.Name == "PetMover" then
+                    local model = v:FindFirstChild(v:GetAttribute("UUID"))
+                    if model and model:IsA("Model") and model:GetAttribute("CurrentSkin") == "Moon Cat" then
+                        task.spawn(IdleHandler.Activate, v)
+                    end
+                end
             end
-            task.wait(0.1)
         end
+        task.wait()
     end
+end)
 
-    notify("Success", count .. " sprinklers cleared")
+--// Echo Frog detection
+task.spawn(function()
+    while running do
+        if getgenv().AutoIdleToggle then 
+            for _, v in ipairs(workspace.PetsPhysical:GetChildren()) do
+                if v:IsA("BasePart") and v.Name == "PetMover" then
+                    local uuid = v:GetAttribute("UUID")
+                    local model = uuid and v:FindFirstChild(uuid)
 
-    -- Put shovel back
-    if char:FindFirstChild("Shovel [Destroy Plants]") then
-        char:FindFirstChild("Shovel [Destroy Plants]").Parent = backpack
-    end
-end
-
--- Echo Frog/Triceratops functionality
-local function handleEchoFrog()
-    if not config.idle then return end
-    
-    local gameEvents = storage:FindFirstChild("GameEvents")
-    if not gameEvents then return end
-    
-    local getCooldown = gameEvents:FindFirstChild("GetPetCooldown")
-    if not getCooldown then return end
-    
-    local petsPhysical = workspace:FindFirstChild("PetsPhysical")
-    if not petsPhysical then return end
-    
-    for _, pet in pairs(petsPhysical:GetChildren()) do
-        if pet:IsA("BasePart") and pet.Name == "PetMover" then
-            local uuid = pet:GetAttribute("UUID")
-            local model = uuid and pet:FindFirstChild(uuid)
-            
-            if model and model:IsA("Model") and model:GetAttribute("CurrentSkin") == nil then
-                local ok, cooldowns = pcall(getCooldown.InvokeServer, getCooldown, uuid)
-                if ok and type(cooldowns) == "table" then
-                    for _, cd in pairs(cooldowns) do
-                        if cd and cd.Time then
-                            local time = tonumber(cd.Time)
-                            if time and time >= 79 and time <= 81 and not tempAutoIdle then
-                                tempAutoIdle = true
-                                notify("Auto Idle", "Triggered by Echo Frog", 3)
-                                task.delay(10, function()
-                                    tempAutoIdle = false
-                                    notify("Auto Idle", "Echo Frog mode ended", 3)
-                                end)
-                                break
+                    if model and model:IsA("Model") and model:GetAttribute("CurrentSkin") == nil then
+                        local ok, cooldowns = pcall(GetPetCooldown.InvokeServer, GetPetCooldown, uuid)
+                        if ok and typeof(cooldowns) == "table" then
+                            for _, cd in ipairs(cooldowns) do
+                                local time = tonumber(cd.Time)
+                                if time and time >= 79 and time <= 81 and not getgenv().AutoIdle then
+                                    notify("Auto Idle", "True")
+                                    getgenv().AutoIdle = true
+                                    task.delay(10, function()
+                                        getgenv().AutoIdle = false
+                                        notify("Auto Idle", "False")
+                                    end)
+                                    break
+                                end
                             end
                         end
                     end
                 end
             end
+        else
+            getgenv().AutoIdle = false
         end
-    end
-end
-
--- Moon Cat functionality
-local function handleMoonCat()
-    if not (config.idle or tempAutoIdle) then return end
-    
-    local modules = storage:FindFirstChild("Modules")
-    if not modules then return end
-    
-    local petServices = modules:FindFirstChild("PetServices")
-    if not petServices then return end
-    
-    local petActionUI = petServices:FindFirstChild("PetActionUserInterfaceService")
-    if not petActionUI then return end
-    
-    local petHandlers = petActionUI:FindFirstChild("PetActionsHandlers")
-    if not petHandlers then return end
-    
-    local idleHandler = petHandlers:FindFirstChild("Idle")
-    if not idleHandler then return end
-    
-    local success, handler = pcall(require, idleHandler)
-    if not success or not handler then return end
-    
-    local petsPhysical = workspace:FindFirstChild("PetsPhysical")
-    if not petsPhysical then return end
-    
-    for _, pet in pairs(petsPhysical:GetChildren()) do
-        if pet:IsA("BasePart") and pet.Name == "PetMover" then
-            local uuid = pet:GetAttribute("UUID")
-            if uuid then
-                local model = pet:FindFirstChild(uuid)
-                if model and model:IsA("Model") and model:GetAttribute("CurrentSkin") == "Moon Cat" then
-                    pcall(function()
-                        task.spawn(handler.Activate, pet)
-                    end)
-                end
-            end
-        end
-    end
-end
-
--- Main loop
-task.spawn(function()
-    while running do
-        pcall(handleEchoFrog)
-        pcall(handleMoonCat)
         task.wait(1)
     end
 end)
