@@ -70,8 +70,8 @@ local function createGui()
     -- Main container with modern styling
     local main = Instance.new("Frame")
     main.Name = "MainFrame"
-    main.Size = UDim2.new(0, 300, 0, 200)
-    main.Position = UDim2.new(0.5, -150, 0.5, -100)
+    main.Size = UDim2.new(0, 300, 0, 220)
+    main.Position = UDim2.new(0.5, -150, 0.5, -110)
     main.BackgroundColor3 = Color3.fromRGB(18, 18, 20)
     main.BorderSizePixel = 0
     main.Parent = gui
@@ -126,6 +126,23 @@ local function createGui()
     local closeBtnCorner = Instance.new("UICorner")
     closeBtnCorner.CornerRadius = UDim.new(0, 8)
     closeBtnCorner.Parent = closeBtn
+    
+    -- Modern minimize button
+    local minimizeBtn = Instance.new("TextButton")
+    minimizeBtn.Name = "MinimizeButton"
+    minimizeBtn.Size = UDim2.new(0, 32, 0, 32)
+    minimizeBtn.Position = UDim2.new(1, -82, 0, 9)
+    minimizeBtn.BackgroundColor3 = Color3.fromRGB(255, 193, 7)
+    minimizeBtn.BorderSizePixel = 0
+    minimizeBtn.Text = "—"
+    minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    minimizeBtn.TextSize = 18
+    minimizeBtn.Font = Enum.Font.GothamBold
+    minimizeBtn.Parent = header
+    
+    local minimizeBtnCorner = Instance.new("UICorner")
+    minimizeBtnCorner.CornerRadius = UDim.new(0, 8)
+    minimizeBtnCorner.Parent = minimizeBtn
     
     -- Content area
     local content = Instance.new("Frame")
@@ -251,10 +268,82 @@ local function createGui()
     -- Create UI elements
     createToggle("idle", "Auto Idle", 1)
     createToggle("smart", "Smart Mode", 2)
-    createButton("clear", "Clear Sprinklers", 3, function()
+    createToggle("notify", "Notifications", 3)
+    createButton("clear", "Clear Sprinklers", 4, function()
         clearSprinklers()
     end)
-    createToggle("notify", "Notifications", 4)
+    
+    -- Floating toggle button (minimized state)
+    local floatingBtn = Instance.new("TextButton")
+    floatingBtn.Name = "FloatingButton"
+    floatingBtn.Size = UDim2.new(0, isMobile and 60 or 50, 0, isMobile and 60 or 50)
+    floatingBtn.Position = UDim2.new(1, isMobile and -80 or -70, 1, isMobile and -80 or -70)
+    floatingBtn.BackgroundColor3 = Color3.fromRGB(52, 168, 83)
+    floatingBtn.BorderSizePixel = 0
+    floatingBtn.Text = isMobile and "🐀" or "🌾"
+    floatingBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    floatingBtn.TextSize = isMobile and 30 or 24
+    floatingBtn.Font = Enum.Font.GothamBold
+    floatingBtn.Parent = gui
+    floatingBtn.Visible = false
+    
+    local floatingBtnCorner = Instance.new("UICorner")
+    floatingBtnCorner.CornerRadius = UDim.new(0.5, 0)
+    floatingBtnCorner.Parent = floatingBtn
+    
+    -- Add shadow effect to floating button
+    local shadow = Instance.new("Frame")
+    shadow.Name = "Shadow"
+    shadow.Size = UDim2.new(1, 6, 1, 6)
+    shadow.Position = UDim2.new(0, -3, 0, -3)
+    shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    shadow.BackgroundTransparency = 0.8
+    shadow.BorderSizePixel = 0
+    shadow.ZIndex = floatingBtn.ZIndex - 1
+    shadow.Parent = floatingBtn
+    
+    local shadowCorner = Instance.new("UICorner")
+    shadowCorner.CornerRadius = UDim.new(0.5, 0)
+    shadowCorner.Parent = shadow
+    
+    local isMinimized = false
+    
+    -- Minimize/Restore functionality
+    local function toggleMinimize()
+        isMinimized = not isMinimized
+        
+        if isMinimized then
+            -- Hide main window, show floating button
+            tween:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+                Size = UDim2.new(0, 0, 0, 0)
+            }):Play()
+            
+            task.wait(0.3)
+            main.Visible = false
+            floatingBtn.Visible = true
+            
+            -- Animate floating button in
+            floatingBtn.Size = UDim2.new(0, 0, 0, 0)
+            tween:Create(floatingBtn, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+                Size = UDim2.new(0, isMobile and 60 or 50, 0, isMobile and 60 or 50)
+            }):Play()
+        else
+            -- Hide floating button, show main window
+            tween:Create(floatingBtn, TweenInfo.new(0.2), {
+                Size = UDim2.new(0, 0, 0, 0)
+            }):Play()
+            
+            task.wait(0.2)
+            floatingBtn.Visible = false
+            main.Visible = true
+            
+            -- Animate main window in
+            main.Size = UDim2.new(0, 0, 0, 0)
+            tween:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+                Size = UDim2.new(0, 300, 0, 220)
+            }):Play()
+        end
+    end
     
     -- Close button functionality
     closeBtn.MouseButton1Click:Connect(function()
@@ -262,13 +351,41 @@ local function createGui()
         gui:Destroy()
     end)
     
-    -- Close button hover effect
+    -- Minimize button functionality
+    minimizeBtn.MouseButton1Click:Connect(toggleMinimize)
+    
+    -- Floating button functionality
+    floatingBtn.MouseButton1Click:Connect(toggleMinimize)
+    
+    -- Button hover effects
     closeBtn.MouseEnter:Connect(function()
         tween:Create(closeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 89, 89)}):Play()
     end)
     
     closeBtn.MouseLeave:Connect(function()
         tween:Create(closeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 69, 69)}):Play()
+    end)
+    
+    minimizeBtn.MouseEnter:Connect(function()
+        tween:Create(minimizeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 213, 47)}):Play()
+    end)
+    
+    minimizeBtn.MouseLeave:Connect(function()
+        tween:Create(minimizeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 193, 7)}):Play()
+    end)
+    
+    floatingBtn.MouseEnter:Connect(function()
+        tween:Create(floatingBtn, TweenInfo.new(0.15), {
+            BackgroundColor3 = Color3.fromRGB(62, 185, 96),
+            Size = UDim2.new(0, isMobile and 65 or 55, 0, isMobile and 65 or 55)
+        }):Play()
+    end)
+    
+    floatingBtn.MouseLeave:Connect(function()
+        tween:Create(floatingBtn, TweenInfo.new(0.15), {
+            BackgroundColor3 = Color3.fromRGB(52, 168, 83),
+            Size = UDim2.new(0, isMobile and 60 or 50, 0, isMobile and 60 or 50)
+        }):Play()
     end)
     
     -- Dragging functionality
@@ -297,10 +414,14 @@ local function createGui()
         end
     end)
     
-    -- Toggle visibility
+    -- Toggle visibility with Insert key
     input.InputBegan:Connect(function(input)
         if input.KeyCode == Enum.KeyCode.Insert then
-            main.Visible = not main.Visible
+            if isMinimized then
+                toggleMinimize()
+            else
+                main.Visible = not main.Visible
+            end
         end
     end)
     
