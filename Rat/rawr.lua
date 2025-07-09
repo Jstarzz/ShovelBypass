@@ -21,15 +21,11 @@ local running = true
 local config = {
     idle = false,
     smart = true,
-    shovel = false,
     notify = true,
-    theme = "dark"
 }
 
 local folder = "farmtool"
 local file = folder .. "/config.json"
-
--- Mobile detection
 local isMobile = input.TouchEnabled and not input.KeyboardEnabled
 
 local function save()
@@ -58,384 +54,255 @@ local function notify(title, text, time)
     if not config.notify then return end
     
     game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = title or "farm",
-        Text = text or "done",
-        Duration = time or 2
+        Title = title or "Farm Helper",
+        Text = text or "Done",
+        Duration = time or 3
     })
 end
 
 local function createGui()
     local gui = Instance.new("ScreenGui")
-    gui.Name = "farm"
+    gui.Name = "ModernFarmHelper"
     gui.Parent = player.PlayerGui
     gui.ResetOnSpawn = false
     gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     
-    -- Mobile-responsive sizing
-    local screenSize = workspace.CurrentCamera.ViewportSize
-    local isSmallScreen = screenSize.X < 800 or screenSize.Y < 600
-    
-    local mainWidth = isMobile and (isSmallScreen and 320 or 360) or 380
-    local mainHeight = isMobile and (isSmallScreen and 240 or 280) or 300
-    
+    -- Main container with modern styling
     local main = Instance.new("Frame")
-    main.Name = "main"
-    main.Size = UDim2.new(0, mainWidth, 0, mainHeight)
-    main.Position = UDim2.new(0.5, -mainWidth/2, 0.5, -mainHeight/2)
-    main.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+    main.Name = "MainFrame"
+    main.Size = UDim2.new(0, 300, 0, 200)
+    main.Position = UDim2.new(0.5, -150, 0.5, -100)
+    main.BackgroundColor3 = Color3.fromRGB(18, 18, 20)
     main.BorderSizePixel = 0
     main.Parent = gui
-    main.ZIndex = 10
     
-    local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, 8)
-    corner.Parent = main
+    -- Soft rounded corners
+    local mainCorner = Instance.new("UICorner")
+    mainCorner.CornerRadius = UDim.new(0, 16)
+    mainCorner.Parent = main
     
-    local grad = Instance.new("UIGradient")
-    grad.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 35)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 30))
+    -- Subtle gradient
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(22, 22, 26)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(18, 18, 20))
     }
-    grad.Rotation = 90
-    grad.Parent = main
+    gradient.Rotation = 45
+    gradient.Parent = main
     
-    local top = Instance.new("Frame")
-    top.Name = "top"
-    top.Size = UDim2.new(1, 0, 0, isMobile and 40 or 35)
-    top.Position = UDim2.new(0, 0, 0, 0)
-    top.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
-    top.BorderSizePixel = 0
-    top.Parent = main
-    top.ZIndex = 11
-    
-    local topCorner = Instance.new("UICorner")
-    topCorner.CornerRadius = UDim.new(0, 8)
-    topCorner.Parent = top
+    -- Modern header
+    local header = Instance.new("Frame")
+    header.Name = "Header"
+    header.Size = UDim2.new(1, 0, 0, 50)
+    header.Position = UDim2.new(0, 0, 0, 0)
+    header.BackgroundTransparency = 1
+    header.Parent = main
     
     local title = Instance.new("TextLabel")
-    title.Name = "title"
-    title.Size = UDim2.new(1, -70, 1, 0)
-    title.Position = UDim2.new(0, 12, 0, 0)
+    title.Name = "Title"
+    title.Size = UDim2.new(1, -80, 1, 0)
+    title.Position = UDim2.new(0, 20, 0, 0)
     title.BackgroundTransparency = 1
-    title.Text = "farm helper"
-    title.TextColor3 = Color3.fromRGB(200, 200, 200)
-    title.TextScaled = true
+    title.Text = "Farm Helper"
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextSize = 18
     title.TextXAlignment = Enum.TextXAlignment.Left
-    title.Font = Enum.Font.Gotham
-    title.Parent = top
-    title.ZIndex = 12
+    title.Font = Enum.Font.GothamBold
+    title.Parent = header
     
-    local minimize = Instance.new("TextButton")
-    minimize.Name = "minimize"
-    minimize.Size = UDim2.new(0, isMobile and 30 or 25, 0, isMobile and 30 or 25)
-    minimize.Position = UDim2.new(1, isMobile and -67 or -62, 0, isMobile and 5 or 5)
-    minimize.BackgroundColor3 = Color3.fromRGB(80, 120, 180)
-    minimize.BorderSizePixel = 0
-    minimize.Text = "-"
-    minimize.TextColor3 = Color3.fromRGB(255, 255, 255)
-    minimize.TextScaled = true
-    minimize.Font = Enum.Font.Gotham
-    minimize.Parent = top
-    minimize.ZIndex = 12
+    -- Modern close button
+    local closeBtn = Instance.new("TextButton")
+    closeBtn.Name = "CloseButton"
+    closeBtn.Size = UDim2.new(0, 32, 0, 32)
+    closeBtn.Position = UDim2.new(1, -45, 0, 9)
+    closeBtn.BackgroundColor3 = Color3.fromRGB(255, 69, 69)
+    closeBtn.BorderSizePixel = 0
+    closeBtn.Text = "×"
+    closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeBtn.TextSize = 18
+    closeBtn.Font = Enum.Font.GothamBold
+    closeBtn.Parent = header
     
-    local minimizeCorner = Instance.new("UICorner")
-    minimizeCorner.CornerRadius = UDim.new(0, 4)
-    minimizeCorner.Parent = minimize
+    local closeBtnCorner = Instance.new("UICorner")
+    closeBtnCorner.CornerRadius = UDim.new(0, 8)
+    closeBtnCorner.Parent = closeBtn
     
-    local close = Instance.new("TextButton")
-    close.Name = "close"
-    close.Size = UDim2.new(0, isMobile and 30 or 25, 0, isMobile and 30 or 25)
-    close.Position = UDim2.new(1, isMobile and -32 or -32, 0, isMobile and 5 or 5)
-    close.BackgroundColor3 = Color3.fromRGB(200, 80, 80)
-    close.BorderSizePixel = 0
-    close.Text = "×"
-    close.TextColor3 = Color3.fromRGB(255, 255, 255)
-    close.TextScaled = true
-    close.Font = Enum.Font.Gotham
-    close.Parent = top
-    close.ZIndex = 12
-    
-    local closeCorner = Instance.new("UICorner")
-    closeCorner.CornerRadius = UDim.new(0, 4)
-    closeCorner.Parent = close
-    
+    -- Content area
     local content = Instance.new("Frame")
-    content.Name = "content"
-    content.Size = UDim2.new(1, -16, 1, -(isMobile and 50 or 45))
-    content.Position = UDim2.new(0, 8, 0, isMobile and 45 or 40)
+    content.Name = "Content"
+    content.Size = UDim2.new(1, -24, 1, -70)
+    content.Position = UDim2.new(0, 12, 0, 58)
     content.BackgroundTransparency = 1
     content.Parent = main
-    content.ZIndex = 11
     
-    local scrollFrame = Instance.new("ScrollingFrame")
-    scrollFrame.Size = UDim2.new(1, 0, 1, 0)
-    scrollFrame.Position = UDim2.new(0, 0, 0, 0)
-    scrollFrame.BackgroundTransparency = 1
-    scrollFrame.BorderSizePixel = 0
-    scrollFrame.ScrollBarThickness = isMobile and 8 or 6
-    scrollFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 100)
-    scrollFrame.Parent = content
-    scrollFrame.ZIndex = 11
+    local contentLayout = Instance.new("UIListLayout")
+    contentLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    contentLayout.Padding = UDim.new(0, 12)
+    contentLayout.Parent = content
     
-    local layout = Instance.new("UIListLayout")
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-    layout.Padding = UDim.new(0, 8)
-    layout.Parent = scrollFrame
-    
-    local function updateScrollFrameSize()
-        scrollFrame.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y)
-    end
-    
-    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateScrollFrameSize)
-    
-    local function makeToggle(name, text, layoutOrder, callback)
-        local toggle = Instance.new("Frame")
-        toggle.Name = name
-        toggle.Size = UDim2.new(1, -10, 0, isMobile and 45 or 38)
-        toggle.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
-        toggle.BorderSizePixel = 0
-        toggle.Parent = scrollFrame
-        toggle.LayoutOrder = layoutOrder
-        toggle.ZIndex = 12
+    -- Modern toggle function
+    local function createToggle(name, text, order)
+        local toggleFrame = Instance.new("Frame")
+        toggleFrame.Name = name .. "Toggle"
+        toggleFrame.Size = UDim2.new(1, 0, 0, 36)
+        toggleFrame.BackgroundColor3 = Color3.fromRGB(26, 26, 30)
+        toggleFrame.BorderSizePixel = 0
+        toggleFrame.Parent = content
+        toggleFrame.LayoutOrder = order
         
         local toggleCorner = Instance.new("UICorner")
-        toggleCorner.CornerRadius = UDim.new(0, 6)
-        toggleCorner.Parent = toggle
+        toggleCorner.CornerRadius = UDim.new(0, 10)
+        toggleCorner.Parent = toggleFrame
         
-        local label = Instance.new("TextLabel")
-        label.Size = UDim2.new(1, -60, 1, 0)
-        label.Position = UDim2.new(0, 12, 0, 0)
-        label.BackgroundTransparency = 1
-        label.Text = text
-        label.TextColor3 = Color3.fromRGB(180, 180, 180)
-        label.TextScaled = true
-        label.TextXAlignment = Enum.TextXAlignment.Left
-        label.Font = Enum.Font.Gotham
-        label.Parent = toggle
-        label.ZIndex = 13
+        local toggleLabel = Instance.new("TextLabel")
+        toggleLabel.Size = UDim2.new(1, -60, 1, 0)
+        toggleLabel.Position = UDim2.new(0, 16, 0, 0)
+        toggleLabel.BackgroundTransparency = 1
+        toggleLabel.Text = text
+        toggleLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
+        toggleLabel.TextSize = 14
+        toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+        toggleLabel.Font = Enum.Font.Gotham
+        toggleLabel.Parent = toggleFrame
         
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(0, isMobile and 45 or 35, 0, isMobile and 25 or 20)
-        btn.Position = UDim2.new(1, isMobile and -52 or -42, 0.5, isMobile and -12.5 or -10)
-        btn.BackgroundColor3 = Color3.fromRGB(180, 80, 80)
-        btn.BorderSizePixel = 0
-        btn.Text = "off"
-        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        btn.TextScaled = true
-        btn.Font = Enum.Font.Gotham
-        btn.Parent = toggle
-        btn.ZIndex = 13
+        local toggleSwitch = Instance.new("Frame")
+        toggleSwitch.Size = UDim2.new(0, 44, 0, 24)
+        toggleSwitch.Position = UDim2.new(1, -56, 0.5, -12)
+        toggleSwitch.BackgroundColor3 = Color3.fromRGB(60, 60, 65)
+        toggleSwitch.BorderSizePixel = 0
+        toggleSwitch.Parent = toggleFrame
         
-        local btnCorner = Instance.new("UICorner")
-        btnCorner.CornerRadius = UDim.new(0, 10)
-        btnCorner.Parent = btn
+        local switchCorner = Instance.new("UICorner")
+        switchCorner.CornerRadius = UDim.new(0, 12)
+        switchCorner.Parent = toggleSwitch
+        
+        local switchKnob = Instance.new("Frame")
+        switchKnob.Size = UDim2.new(0, 18, 0, 18)
+        switchKnob.Position = UDim2.new(0, 3, 0.5, -9)
+        switchKnob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        switchKnob.BorderSizePixel = 0
+        switchKnob.Parent = toggleSwitch
+        
+        local knobCorner = Instance.new("UICorner")
+        knobCorner.CornerRadius = UDim.new(0, 9)
+        knobCorner.Parent = switchKnob
+        
+        local switchButton = Instance.new("TextButton")
+        switchButton.Size = UDim2.new(1, 0, 1, 0)
+        switchButton.Position = UDim2.new(0, 0, 0, 0)
+        switchButton.BackgroundTransparency = 1
+        switchButton.Text = ""
+        switchButton.Parent = toggleSwitch
         
         local state = config[name] or false
         
         local function updateToggle()
-            local color = state and Color3.fromRGB(80, 180, 80) or Color3.fromRGB(180, 80, 80)
-            local text = state and "on" or "off"
+            local bgColor = state and Color3.fromRGB(52, 168, 83) or Color3.fromRGB(60, 60, 65)
+            local knobPos = state and UDim2.new(0, 23, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
             
-            local tw = tween:Create(btn, TweenInfo.new(0.2), {
-                BackgroundColor3 = color
-            })
-            tw:Play()
-            
-            btn.Text = text
+            tween:Create(toggleSwitch, TweenInfo.new(0.2), {BackgroundColor3 = bgColor}):Play()
+            tween:Create(switchKnob, TweenInfo.new(0.2), {Position = knobPos}):Play()
         end
         
         updateToggle()
         
-        btn.MouseButton1Click:Connect(function()
+        switchButton.MouseButton1Click:Connect(function()
             state = not state
+            config[name] = state
             updateToggle()
-            callback(state)
+            save()
+            notify("Settings", text .. " " .. (state and "enabled" or "disabled"))
         end)
         
-        return toggle
+        return toggleFrame
     end
     
-    local function makeButton(name, text, layoutOrder, callback)
-        local btn = Instance.new("TextButton")
-        btn.Name = name
-        btn.Size = UDim2.new(1, -10, 0, isMobile and 40 or 32)
-        btn.BackgroundColor3 = Color3.fromRGB(60, 90, 180)
-        btn.BorderSizePixel = 0
-        btn.Text = text
-        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        btn.TextScaled = true
-        btn.Font = Enum.Font.Gotham
-        btn.Parent = scrollFrame
-        btn.LayoutOrder = layoutOrder
-        btn.ZIndex = 12
+    -- Modern button function
+    local function createButton(name, text, order, callback)
+        local button = Instance.new("TextButton")
+        button.Name = name .. "Button"
+        button.Size = UDim2.new(1, 0, 0, 36)
+        button.BackgroundColor3 = Color3.fromRGB(52, 168, 83)
+        button.BorderSizePixel = 0
+        button.Text = text
+        button.TextColor3 = Color3.fromRGB(255, 255, 255)
+        button.TextSize = 14
+        button.Font = Enum.Font.GothamBold
+        button.Parent = content
+        button.LayoutOrder = order
         
-        local btnCorner = Instance.new("UICorner")
-        btnCorner.CornerRadius = UDim.new(0, 6)
-        btnCorner.Parent = btn
+        local buttonCorner = Instance.new("UICorner")
+        buttonCorner.CornerRadius = UDim.new(0, 10)
+        buttonCorner.Parent = button
         
-        btn.MouseEnter:Connect(function()
-            local tw = tween:Create(btn, TweenInfo.new(0.15), {
-                BackgroundColor3 = Color3.fromRGB(80, 110, 200)
-            })
-            tw:Play()
+        button.MouseEnter:Connect(function()
+            tween:Create(button, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(62, 185, 96)}):Play()
         end)
         
-        btn.MouseLeave:Connect(function()
-            local tw = tween:Create(btn, TweenInfo.new(0.15), {
-                BackgroundColor3 = Color3.fromRGB(60, 90, 180)
-            })
-            tw:Play()
+        button.MouseLeave:Connect(function()
+            tween:Create(button, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(52, 168, 83)}):Play()
         end)
         
-        btn.MouseButton1Click:Connect(callback)
+        button.MouseButton1Click:Connect(callback)
         
-        return btn
+        return button
     end
     
     -- Create UI elements
-    makeToggle("idle", "auto idle", 1, function(state)
-        config.idle = state
-        save()
-        notify("idle", state and "enabled" or "disabled")
-    end)
-    
-    makeToggle("smart", "smart mode", 2, function(state)
-        config.smart = state
-        save()
-        notify("smart", state and "enabled" or "disabled")
-    end)
-    
-    makeButton("shovel", "clear sprinklers", 3, function()
+    createToggle("idle", "Auto Idle", 1)
+    createToggle("smart", "Smart Mode", 2)
+    createButton("clear", "Clear Sprinklers", 3, function()
         clearSprinklers()
     end)
+    createToggle("notify", "Notifications", 4)
     
-    makeToggle("notify", "notifications", 4, function(state)
-        config.notify = state
-        save()
+    -- Close button functionality
+    closeBtn.MouseButton1Click:Connect(function()
+        running = false
+        gui:Destroy()
     end)
     
-    updateScrollFrameSize()
+    -- Close button hover effect
+    closeBtn.MouseEnter:Connect(function()
+        tween:Create(closeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 89, 89)}):Play()
+    end)
+    
+    closeBtn.MouseLeave:Connect(function()
+        tween:Create(closeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 69, 69)}):Play()
+    end)
     
     -- Dragging functionality
     local dragging = false
     local dragStart = nil
     local startPos = nil
     
-    local function startDrag(inputPos)
-        dragging = true
-        dragStart = inputPos
-        startPos = main.Position
-    end
+    header.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = main.Position
+        end
+    end)
     
-    local function updateDrag(inputPos)
-        if dragging then
-            local delta = inputPos - dragStart
+    input.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
             main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
-    end
+    end)
     
-    local function endDrag()
-        dragging = false
-    end
-    
-    -- Desktop dragging
-    top.InputBegan:Connect(function(inp)
-        if inp.UserInputType == Enum.UserInputType.MouseButton1 then
-            startDrag(inp.Position)
+    input.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = false
         end
-    end)
-    
-    input.InputChanged:Connect(function(inp)
-        if inp.UserInputType == Enum.UserInputType.MouseMovement then
-            updateDrag(inp.Position)
-        end
-    end)
-    
-    input.InputEnded:Connect(function(inp)
-        if inp.UserInputType == Enum.UserInputType.MouseButton1 then
-            endDrag()
-        end
-    end)
-    
-    -- Mobile dragging
-    if isMobile then
-        top.InputBegan:Connect(function(inp)
-            if inp.UserInputType == Enum.UserInputType.Touch then
-                startDrag(inp.Position)
-            end
-        end)
-        
-        input.InputChanged:Connect(function(inp)
-            if inp.UserInputType == Enum.UserInputType.Touch then
-                updateDrag(inp.Position)
-            end
-        end)
-        
-        input.InputEnded:Connect(function(inp)
-            if inp.UserInputType == Enum.UserInputType.Touch then
-                endDrag()
-            end
-        end)
-    end
-    
-    -- Minimize functionality
-    local isMinimized = false
-    minimize.MouseButton1Click:Connect(function()
-        isMinimized = not isMinimized
-        
-        local targetHeight = isMinimized and (isMobile and 40 or 35) or mainHeight
-        minimize.Text = isMinimized and "+" or "-"
-        content.Visible = not isMinimized
-        
-        local tw = tween:Create(main, TweenInfo.new(0.3), {
-            Size = UDim2.new(0, mainWidth, 0, targetHeight)
-        })
-        tw:Play()
-    end)
-    
-    close.MouseButton1Click:Connect(function()
-        running = false
-        gui:Destroy()
     end)
     
     -- Toggle visibility
-    local toggleVisibility = function()
-        main.Visible = not main.Visible
-    end
-    
-    -- Desktop toggle
-    input.InputBegan:Connect(function(inp)
-        if inp.KeyCode == Enum.KeyCode.Insert then
-            toggleVisibility()
+    input.InputBegan:Connect(function(input)
+        if input.KeyCode == Enum.KeyCode.Insert then
+            main.Visible = not main.Visible
         end
     end)
-    
-    -- Mobile toggle (double-tap in corner)
-    if isMobile then
-        local tapCount = 0
-        local lastTapTime = 0
-        
-        gui.InputBegan:Connect(function(inp)
-            if inp.UserInputType == Enum.UserInputType.Touch then
-                local currentTime = tick()
-                local pos = inp.Position
-                local screenCorner = Vector2.new(0, 0)
-                
-                if (pos - screenCorner).Magnitude < 100 then
-                    if currentTime - lastTapTime < 0.5 then
-                        tapCount = tapCount + 1
-                        if tapCount >= 2 then
-                            toggleVisibility()
-                            tapCount = 0
-                        end
-                    else
-                        tapCount = 1
-                    end
-                    lastTapTime = currentTime
-                end
-            end
-        end)
-    end
     
     return gui
 end
@@ -458,19 +325,19 @@ end
 function clearSprinklers()
     local char = player.Character
     if not char then
-        notify("error", "no character")
+        notify("Error", "Character not found")
         return
     end
     
     local humanoid = char:FindFirstChild("Humanoid")
     if not humanoid then
-        notify("error", "no humanoid")
+        notify("Error", "Humanoid not found")
         return
     end
     
     local backpack = player:FindFirstChild("Backpack")
     if not backpack then
-        notify("error", "no backpack")
+        notify("Error", "Backpack not found")
         return
     end
     
@@ -478,7 +345,7 @@ function clearSprinklers()
                    backpack:FindFirstChild("Shovel [Destroy Plants]")
     
     if not shovel then
-        notify("error", "no shovel found")
+        notify("Error", "Shovel not found")
         return
     end
     
@@ -490,25 +357,25 @@ function clearSprinklers()
     
     local garden = findGarden()
     if not garden then
-        notify("error", "no garden found")
+        notify("Error", "Garden not found")
         return
     end
     
     local objects = garden.Important:FindFirstChild("Objects_Physical")
     if not objects then 
-        notify("error", "no objects found")
+        notify("Error", "No objects found")
         return 
     end
     
     local gameEvents = storage:FindFirstChild("GameEvents")
     if not gameEvents then
-        notify("error", "no game events")
+        notify("Error", "Game events not found")
         return
     end
     
     local deleteEvent = gameEvents:FindFirstChild("DeleteObject")
     if not deleteEvent then
-        notify("error", "no delete event")
+        notify("Error", "Delete event not found")
         return
     end
     
@@ -526,7 +393,7 @@ function clearSprinklers()
         end
     end
     
-    notify("cleared", count .. " sprinklers")
+    notify("Success", count .. " sprinklers cleared")
     
     -- Put shovel back
     if char:FindFirstChild("Shovel [Destroy Plants]") then
@@ -590,7 +457,7 @@ local function handleIdle()
                                         pcall(function()
                                             task.spawn(handler.Activate, pet)
                                         end)
-                                        notify("auto idle", math.floor(time) .. "s")
+                                        notify("Auto Idle", "Activated - " .. math.floor(time) .. "s")
                                         break
                                     end
                                 end
@@ -616,7 +483,7 @@ end)
 local gui = createGui()
 getgenv().ui = gui
 
-notify("loaded", isMobile and "double-tap corner to toggle" or "press insert to toggle")
+notify("Farm Helper", isMobile and "Touch to interact" or "Press Insert to toggle")
 
 getgenv().ui = {
     gui = gui,
