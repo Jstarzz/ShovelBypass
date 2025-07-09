@@ -1,71 +1,58 @@
---// Game Place ID Check
 if game.PlaceId ~= 126884695634066 then
     return
 end
 
---// Unload existing UI if any (from previous runs of this script)
 if getgenv().ui then
     getgenv().ui:Destroy()
     getgenv().ui = nil
 end
 
---// Services
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local UserInputService = game:GetService("UserInputService")
-local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
-local HttpService = game:GetService("HttpService")
+local players = game:GetService("Players")
+local storage = game:GetService("ReplicatedStorage")
+local input = game:GetService("UserInputService")
+local tween = game:GetService("TweenService")
+local run = game:GetService("RunService")
+local http = game:GetService("HttpService")
 
-local Player = Players.LocalPlayer
+local player = players.LocalPlayer
+local mouse = player:GetMouse()
 
---// Runtime Control
-local running = true -- Controls the main loops for auto-idle
-local uiActive = true -- Controls the UI loops (used for unload)
-
---// Configuration and Defaults
+local running = true
 local config = {
-    AutoIdle = false,         -- Single toggle for all auto-idling
-    Notifications = true,
+    idle = false,
+    notify = true,
 }
 
-local configFolder = "grangrant"
-local configFile = configFolder .. "/config.json"
+-- Add Echo Frog/Triceratops functionality
+local tempAutoIdle = false
+local folder = "farmtool"
+local file = folder .. "/config.json"
+local isMobile = input.TouchEnabled and not input.KeyboardEnabled
 
---// Save/Load Functions
-local function saveConfig()
-    if not isfolder(configFolder) then
-        makefolder(configFolder)
+local function save()
+    if not isfolder(folder) then
+        makefolder(folder)
     end
-    writefile(configFile, HttpService:JSONEncode(config))
+    writefile(file, http:JSONEncode(config))
 end
 
-local function loadConfig()
-    if isfile(configFile) then
+local function load()
+    if isfile(file) then
         local ok, data = pcall(function()
-            return HttpService:JSONDecode(readfile(configFile))
+            return http:JSONDecode(readfile(file))
         end)
         if ok and data then
             for k, v in pairs(data) do
-                if config[k] ~= nil then
-                    config[k] = v
-                end
+                config[k] = v
             end
-        end
-    end
-    for k, v in pairs(config) do
-        if rawget(config, k) == nil then
-            config[k] = v
         end
     end
 end
 
-loadConfig()
+load()
 
---// Notification Function
 local function notify(title, text, time)
-    if not config.Notifications then return end
-
+    if not config.notify then return end
     game:GetService("StarterGui"):SetCore("SendNotification", {
         Title = title or "Farm Helper",
         Text = text or "Done",
@@ -73,15 +60,14 @@ local function notify(title, text, time)
     })
 end
 
---// UI Creation Function
 local function createGui()
     local gui = Instance.new("ScreenGui")
     gui.Name = "ModernFarmHelper"
-    gui.Parent = Player.PlayerGui
+    gui.Parent = player.PlayerGui
     gui.ResetOnSpawn = false
     gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-    -- Main container with modern styling
+    -- Main container
     local main = Instance.new("Frame")
     main.Name = "MainFrame"
     main.Size = UDim2.new(0, 300, 0, 220)
@@ -90,12 +76,10 @@ local function createGui()
     main.BorderSizePixel = 0
     main.Parent = gui
 
-    -- Soft rounded corners
     local mainCorner = Instance.new("UICorner")
     mainCorner.CornerRadius = UDim.new(0, 16)
     mainCorner.Parent = main
 
-    -- Subtle gradient
     local gradient = Instance.new("UIGradient")
     gradient.Color = ColorSequence.new{
         ColorSequenceKeypoint.new(0, Color3.fromRGB(22, 22, 26)),
@@ -104,7 +88,7 @@ local function createGui()
     gradient.Rotation = 45
     gradient.Parent = main
 
-    -- Modern header (draggable area)
+    -- Header
     local header = Instance.new("Frame")
     header.Name = "Header"
     header.Size = UDim2.new(1, 0, 0, 50)
@@ -124,7 +108,7 @@ local function createGui()
     title.Font = Enum.Font.GothamBold
     title.Parent = header
 
-    -- Modern close button
+    -- Close button
     local closeBtn = Instance.new("TextButton")
     closeBtn.Name = "CloseButton"
     closeBtn.Size = UDim2.new(0, 32, 0, 32)
@@ -141,40 +125,24 @@ local function createGui()
     closeBtnCorner.CornerRadius = UDim.new(0, 8)
     closeBtnCorner.Parent = closeBtn
 
-    -- Minimized button (now main toggle for min/max)
+    -- Minimize button
     local minimizeBtn = Instance.new("TextButton")
     minimizeBtn.Name = "MinimizeButton"
-    minimizeBtn.Size = UDim2.new(0, UserInputService.TouchEnabled and 60 or 50, 0, UserInputService.TouchEnabled and 60 or 50)
-    minimizeBtn.Position = UDim2.new(0.05, -minimizeBtn.Size.X.Offset / 2, 0.4, -minimizeBtn.Size.Y.Offset / 2)
-    minimizeBtn.BackgroundColor3 = Color3.fromRGB(52, 168, 83)
+    minimizeBtn.Size = UDim2.new(0, 32, 0, 32)
+    minimizeBtn.Position = UDim2.new(1, -82, 0, 9)
+    minimizeBtn.BackgroundColor3 = Color3.fromRGB(255, 193, 7)
     minimizeBtn.BorderSizePixel = 0
-    minimizeBtn.Text = UserInputService.TouchEnabled and "🐀" or "🌾"
+    minimizeBtn.Text = "—"
     minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    minimizeBtn.TextSize = UserInputService.TouchEnabled and 30 or 24
+    minimizeBtn.TextSize = 18
     minimizeBtn.Font = Enum.Font.GothamBold
-    minimizeBtn.Parent = gui
-    minimizeBtn.Visible = false
+    minimizeBtn.Parent = header
 
     local minimizeBtnCorner = Instance.new("UICorner")
-    minimizeBtnCorner.CornerRadius = UDim.new(0.5, 0)
+    minimizeBtnCorner.CornerRadius = UDim.new(0, 8)
     minimizeBtnCorner.Parent = minimizeBtn
 
-    -- Add shadow effect to floating button
-    local shadow = Instance.new("Frame")
-    shadow.Name = "Shadow"
-    shadow.Size = UDim2.new(1, 6, 1, 6)
-    shadow.Position = UDim2.new(0, -3, 0, -3)
-    shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    shadow.BackgroundTransparency = 0.8
-    shadow.BorderSizePixel = 0
-    shadow.ZIndex = minimizeBtn.ZIndex - 1
-    shadow.Parent = minimizeBtn
-
-    local shadowCorner = Instance.new("UICorner")
-    shadowCorner.CornerRadius = UDim.new(0.5, 0)
-    shadowCorner.Parent = shadow
-
-    -- Content area for toggles and buttons
+    -- Content area
     local content = Instance.new("Frame")
     content.Name = "Content"
     content.Size = UDim2.new(1, -24, 1, -70)
@@ -187,7 +155,7 @@ local function createGui()
     contentLayout.Padding = UDim.new(0, 12)
     contentLayout.Parent = content
 
-    -- Modern toggle function
+    -- Toggle function
     local function createToggle(name, text, order)
         local toggleFrame = Instance.new("Frame")
         toggleFrame.Name = name .. "Toggle"
@@ -217,7 +185,7 @@ local function createGui()
         toggleSwitch.Position = UDim2.new(1, -56, 0.5, -12)
         toggleSwitch.BackgroundColor3 = Color3.fromRGB(60, 60, 65)
         toggleSwitch.BorderSizePixel = 0
-        toggleSwitch.Parent = toggleSwitch
+        toggleSwitch.Parent = toggleFrame
 
         local switchCorner = Instance.new("UICorner")
         switchCorner.CornerRadius = UDim.new(0, 12)
@@ -247,8 +215,8 @@ local function createGui()
             local bgColor = state and Color3.fromRGB(52, 168, 83) or Color3.fromRGB(60, 60, 65)
             local knobPos = state and UDim2.new(0, 23, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
 
-            TweenService:Create(toggleSwitch, TweenInfo.new(0.2), {BackgroundColor3 = bgColor}):Play()
-            TweenService:Create(switchKnob, TweenInfo.new(0.2), {Position = knobPos}):Play()
+            tween:Create(toggleSwitch, TweenInfo.new(0.2), {BackgroundColor3 = bgColor}):Play()
+            tween:Create(switchKnob, TweenInfo.new(0.2), {Position = knobPos}):Play()
         end
 
         updateToggle()
@@ -257,14 +225,14 @@ local function createGui()
             state = not state
             config[name] = state
             updateToggle()
-            saveConfig()
+            save()
             notify("Settings", text .. " " .. (state and "enabled" or "disabled"))
         end)
 
         return toggleFrame
     end
 
-    -- Modern button function
+    -- Button function
     local function createButton(name, text, order, callback)
         local button = Instance.new("TextButton")
         button.Name = name .. "Button"
@@ -283,11 +251,11 @@ local function createGui()
         buttonCorner.Parent = button
 
         button.MouseEnter:Connect(function()
-            TweenService:Create(button, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(62, 185, 96)}):Play()
+            tween:Create(button, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(62, 185, 96)}):Play()
         end)
 
         button.MouseLeave:Connect(function()
-            TweenService:Create(button, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(52, 168, 83)}):Play()
+            tween:Create(button, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(52, 168, 83)}):Play()
         end)
 
         button.MouseButton1Click:Connect(callback)
@@ -296,11 +264,47 @@ local function createGui()
     end
 
     -- Create UI elements
-    createToggle("AutoIdle", "Auto Idle", 1)
-    createToggle("Notifications", "Notifications", 2)
+    createToggle("idle", "Auto Idle", 1)
+    createToggle("notify", "Notifications", 2)
     createButton("clear", "Clear Sprinklers", 3, function()
         clearSprinklers()
     end)
+
+    -- Floating toggle button (minimized state)
+    local floatingBtn = Instance.new("TextButton")
+    floatingBtn.Name = "FloatingButton"
+    floatingBtn.Size = UDim2.new(0, isMobile and 60 or 50, 0, isMobile and 60 or 50)
+    
+    -- Fixed position: left side, slightly above center
+    floatingBtn.Position = UDim2.new(0, 20, 0.4, 0)
+    
+    floatingBtn.BackgroundColor3 = Color3.fromRGB(52, 168, 83)
+    floatingBtn.BorderSizePixel = 0
+    floatingBtn.Text = isMobile and "🐀" or "🌾"
+    floatingBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    floatingBtn.TextSize = isMobile and 30 or 24
+    floatingBtn.Font = Enum.Font.GothamBold
+    floatingBtn.Parent = gui
+    floatingBtn.Visible = false
+
+    local floatingBtnCorner = Instance.new("UICorner")
+    floatingBtnCorner.CornerRadius = UDim.new(0.5, 0)
+    floatingBtnCorner.Parent = floatingBtn
+
+    -- Shadow effect
+    local shadow = Instance.new("Frame")
+    shadow.Name = "Shadow"
+    shadow.Size = UDim2.new(1, 6, 1, 6)
+    shadow.Position = UDim2.new(0, -3, 0, -3)
+    shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    shadow.BackgroundTransparency = 0.8
+    shadow.BorderSizePixel = 0
+    shadow.ZIndex = floatingBtn.ZIndex - 1
+    shadow.Parent = floatingBtn
+
+    local shadowCorner = Instance.new("UICorner")
+    shadowCorner.CornerRadius = UDim.new(0.5, 0)
+    shadowCorner.Parent = shadow
 
     local isMinimized = false
 
@@ -309,152 +313,126 @@ local function createGui()
         isMinimized = not isMinimized
 
         if isMinimized then
-            TweenService:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+            tween:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
                 Size = UDim2.new(0, 0, 0, 0)
             }):Play()
 
             task.wait(0.3)
             main.Visible = false
-            minimizeBtn.Visible = true
+            floatingBtn.Visible = true
 
-            TweenService:Create(minimizeBtn, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
-                BackgroundTransparency = 0
+            floatingBtn.Size = UDim2.new(0, 0, 0, 0)
+            tween:Create(floatingBtn, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+                Size = UDim2.new(0, isMobile and 60 or 50, 0, isMobile and 60 or 50)
             }):Play()
         else
-            TweenService:Create(minimizeBtn, TweenInfo.new(0.2), {
-                BackgroundTransparency = 1
+            tween:Create(floatingBtn, TweenInfo.new(0.2), {
+                Size = UDim2.new(0, 0, 0, 0)
             }):Play()
 
             task.wait(0.2)
-            minimizeBtn.Visible = false
+            floatingBtn.Visible = false
             main.Visible = true
 
             main.Size = UDim2.new(0, 0, 0, 0)
-            TweenService:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+            tween:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
                 Size = UDim2.new(0, 300, 0, 220)
             }):Play()
         end
     end
 
-    -- Close button functionality
+    -- Close button
     closeBtn.MouseButton1Click:Connect(function()
         running = false
-        uiActive = false
         gui:Destroy()
     end)
 
-    -- Minimize button on the main UI
-    local headerMinimizeBtn = Instance.new("TextButton")
-    headerMinimizeBtn.Name = "MinimizeButton"
-    headerMinimizeBtn.Size = UDim2.new(0, 32, 0, 32)
-    headerMinimizeBtn.Position = UDim2.new(1, -82, 0, 9)
-    headerMinimizeBtn.BackgroundColor3 = Color3.fromRGB(255, 193, 7)
-    headerMinimizeBtn.BorderSizePixel = 0
-    headerMinimizeBtn.Text = "—"
-    headerMinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    headerMinimizeBtn.TextSize = 18
-    headerMinimizeBtn.Font = Enum.Font.GothamBold
-    headerMinimizeBtn.Parent = header
-    
-    local headerMinimizeBtnCorner = Instance.new("UICorner")
-    headerMinimizeBtnCorner.CornerRadius = UDim.new(0, 8)
-    headerMinimizeBtnCorner.Parent = headerMinimizeBtn
+    -- Minimize button
+    minimizeBtn.MouseButton1Click:Connect(toggleMinimize)
 
-    headerMinimizeBtn.MouseButton1Click:Connect(toggleMinimize)
+    -- Floating button
+    floatingBtn.MouseButton1Click:Connect(toggleMinimize)
 
-    -- Button hover effects for close and minimize on main UI
+    -- Button hover effects
     closeBtn.MouseEnter:Connect(function()
-        TweenService:Create(closeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 89, 89)}):Play()
+        tween:Create(closeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 89, 89)}):Play()
     end)
 
     closeBtn.MouseLeave:Connect(function()
-        TweenService:Create(closeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 69, 69)}):Play()
+        tween:Create(closeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 69, 69)}):Play()
     end)
 
-    headerMinimizeBtn.MouseEnter:Connect(function()
-        TweenService:Create(headerMinimizeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 213, 47)}):Play()
+    minimizeBtn.MouseEnter:Connect(function()
+        tween:Create(minimizeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 213, 47)}):Play()
     end)
 
-    headerMinimizeBtn.MouseLeave:Connect(function()
-        TweenService:Create(headerMinimizeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 193, 7)}):Play()
+    minimizeBtn.MouseLeave:Connect(function()
+        tween:Create(minimizeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 193, 7)}):Play()
     end)
 
-    -- **REFINED DRAGGING FUNCTIONALITY FOR MAIN FRAME**
-    local mainIsDragging = false
-    local mainDragStartPos = Vector2.new() -- Stores the initial mouse/touch position
-    local mainInitialUIPos = UDim2.new()   -- Stores the UI's position when drag starts
+    floatingBtn.MouseEnter:Connect(function()
+        tween:Create(floatingBtn, TweenInfo.new(0.15), {
+            BackgroundColor3 = Color3.fromRGB(62, 185, 96),
+            Size = UDim2.new(0, isMobile and 65 or 55, 0, isMobile and 65 or 55)
+        }):Play()
+    end)
+
+    floatingBtn.MouseLeave:Connect(function()
+        tween:Create(floatingBtn, TweenInfo.new(0.15), {
+            BackgroundColor3 = Color3.fromRGB(52, 168, 83),
+            Size = UDim2.new(0, isMobile and 60 or 50, 0, isMobile and 60 or 50)
+        }):Play()
+    end)
+
+    -- Dragging functionality
+    local dragging = false
+    local dragStart = nil
+    local startPos = nil
 
     header.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            mainIsDragging = true
-            mainDragStartPos = input.Position
-            mainInitialUIPos = main.Position
-
-            local inputEndedConn = UserInputService.InputEnded:Connect(function(endedInput)
-                if endedInput.UserInputType == Enum.UserInputType.MouseButton1 or endedInput.UserInputType == Enum.UserInputType.Touch then
-                    mainIsDragging = false
-                    inputEndedConn:Disconnect() -- Disconnect this specific connection
-                end
-            end)
+            dragging = true
+            dragStart = input.Position
+            startPos = main.Position
         end
     end)
 
-    UserInputService.InputChanged:Connect(function(input)
-        if mainIsDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local delta = input.Position - mainDragStartPos
-            main.Position = UDim2.new(mainInitialUIPos.X.Scale, mainInitialUIPos.X.Offset + delta.X,
-                                       mainInitialUIPos.Y.Scale, mainInitialUIPos.Y.Offset + delta.Y)
+    input.InputChanged:Connect(function(input)
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - dragStart
+            main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
 
-    -- **REFINED DRAGGING FUNCTIONALITY FOR MINIMIZED BUTTON**
-    local minimizeIsDragging = false
-    local minimizeDragStartPos = Vector2.new()
-    local minimizeInitialUIPos = UDim2.new()
-
-    minimizeBtn.InputBegan:Connect(function(input)
+    input.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            minimizeIsDragging = true
-            minimizeDragStartPos = input.Position
-            minimizeInitialUIPos = minimizeBtn.Position
-
-            local inputEndedConn = UserInputService.InputEnded:Connect(function(endedInput)
-                if endedInput.UserInputType == Enum.UserInputType.MouseButton1 or endedInput.UserInputType == Enum.UserInputType.Touch then
-                    minimizeIsDragging = false
-                    inputEndedConn:Disconnect()
-                end
-            end)
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(input)
-        if minimizeIsDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local delta = input.Position - minimizeDragStartPos
-            minimizeBtn.Position = UDim2.new(minimizeInitialUIPos.X.Scale, minimizeInitialUIPos.X.Offset + delta.X,
-                                              minimizeInitialUIPos.Y.Scale, minimizeInitialUIPos.Y.Offset + delta.Y)
+            dragging = false
         end
     end)
 
     -- Toggle visibility with Insert key
-    UserInputService.InputBegan:Connect(function(input)
+    input.InputBegan:Connect(function(input)
         if input.KeyCode == Enum.KeyCode.Insert then
-            toggleMinimize()
+            if isMinimized then
+                toggleMinimize()
+            else
+                main.Visible = not main.Visible
+            end
         end
     end)
 
     return gui
 end
 
---// Clear Sprinklers Function (Same as before)
 local function findGarden()
     local farm = workspace:FindFirstChild("Farm")
     if not farm then return nil end
 
     for _, plot in pairs(farm:GetChildren()) do
         if plot:FindFirstChild("Important") and
-            plot.Important:FindFirstChild("Data") and
-            plot.Important.Data:FindFirstChild("Owner") and
-            plot.Important.Data.Owner.Value == Player.Name then
+           plot.Important:FindFirstChild("Data") and
+           plot.Important.Data:FindFirstChild("Owner") and
+           plot.Important.Data.Owner.Value == player.Name then
             return plot
         end
     end
@@ -462,34 +440,33 @@ local function findGarden()
 end
 
 function clearSprinklers()
-    local char = Player.Character
+    local char = player.Character
     if not char then
         notify("Error", "Character not found")
         return
     end
 
-    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    local humanoid = char:FindFirstChild("Humanoid")
     if not humanoid then
         notify("Error", "Humanoid not found")
         return
     end
 
-    local backpack = Player:FindFirstChild("Backpack")
+    local backpack = player:FindFirstChild("Backpack")
     if not backpack then
         notify("Error", "Backpack not found")
         return
     end
 
     local shovel = char:FindFirstChild("Shovel [Destroy Plants]") or
-                     backpack:FindFirstChild("Shovel [Destroy Plants]")
+                   backpack:FindFirstChild("Shovel [Destroy Plants]")
 
     if not shovel then
         notify("Error", "Shovel not found")
         return
     end
 
-    local equippedTool = humanoid.EquippedTool
-    if equippedTool ~= shovel then
+    if shovel.Parent == backpack then
         shovel.Parent = char
         humanoid:EquipTool(shovel)
         task.wait(0.4)
@@ -503,17 +480,17 @@ function clearSprinklers()
 
     local objects = garden.Important:FindFirstChild("Objects_Physical")
     if not objects then
-        notify("Error", "No objects found in garden")
+        notify("Error", "No objects found")
         return
     end
 
-    local gameEvents = ReplicatedStorage:WaitForChild("GameEvents")
+    local gameEvents = storage:FindFirstChild("GameEvents")
     if not gameEvents then
         notify("Error", "Game events not found")
         return
     end
 
-    local deleteEvent = gameEvents:WaitForChild("DeleteObject")
+    local deleteEvent = gameEvents:FindFirstChild("DeleteObject")
     if not deleteEvent then
         notify("Error", "Delete event not found")
         return
@@ -522,7 +499,7 @@ function clearSprinklers()
     local count = 0
 
     for _, obj in pairs(objects:GetChildren()) do
-        if obj:IsA("Model") and obj.Name and string.find(obj.Name, "Sprinkler") then
+        if obj:IsA("Model") and obj.Name and obj.Name:find("Sprinkler") then
             local success = pcall(function()
                 deleteEvent:FireServer(obj)
             end)
@@ -535,72 +512,111 @@ function clearSprinklers()
 
     notify("Success", count .. " sprinklers cleared")
 
-    if equippedTool ~= shovel and char:FindFirstChild("Shovel [Destroy Plants]") then
+    -- Put shovel back
+    if char:FindFirstChild("Shovel [Destroy Plants]") then
         char:FindFirstChild("Shovel [Destroy Plants]").Parent = backpack
     end
 end
 
---// Pet Idle Handler (Same as before)
-local GetPetCooldown
-local IdleHandler
-
-task.spawn(function()
-    GetPetCooldown = ReplicatedStorage:WaitForChild("GameEvents"):WaitForChild("GetPetCooldown")
-    IdleHandler = require(ReplicatedStorage.Modules.PetServices.PetActionUserInterfaceService.PetActionsHandlers.Idle)
-
-    while running do
-        if not uiActive then task.wait(1) continue end
-
-        if config.AutoIdle then
-            local petsPhysical = workspace:FindFirstChild("PetsPhysical")
-            if petsPhysical then
-                for _, petMover in ipairs(petsPhysical:GetChildren()) do
-                    if petMover:IsA("BasePart") and petMover.Name == "PetMover" then
-                        local uuid = petMover:GetAttribute("UUID")
-                        local petModel = uuid and petMover:FindFirstChild(uuid)
-
-                        if petModel and petModel:IsA("Model") then
-                            local currentSkin = petModel:GetAttribute("CurrentSkin")
-
-                            if currentSkin == "Moon Cat" or currentSkin == "Triceratops" then
-                                task.spawn(IdleHandler.Activate, petMover)
-                            elseif not currentSkin then
-                                local ok, cooldowns = pcall(GetPetCooldown.InvokeServer, GetPetCooldown, uuid)
-                                if ok and typeof(cooldowns) == "table" then
-                                    for _, cd in ipairs(cooldowns) do
-                                        local time = tonumber(cd.Time)
-                                        if time and time >= 79 and time <= 81 then
-                                            notify({
-                                                Title = "Auto Idle",
-                                                Description = "True",
-                                                Time = 3,
-                                            })
-                                            task.spawn(IdleHandler.Activate, petMover)
-                                            break
-                                        end
-                                    end
-                                end
+-- Echo Frog/Triceratops functionality
+local function handleEchoFrog()
+    if not config.idle then return end
+    
+    local gameEvents = storage:FindFirstChild("GameEvents")
+    if not gameEvents then return end
+    
+    local getCooldown = gameEvents:FindFirstChild("GetPetCooldown")
+    if not getCooldown then return end
+    
+    local petsPhysical = workspace:FindFirstChild("PetsPhysical")
+    if not petsPhysical then return end
+    
+    for _, pet in pairs(petsPhysical:GetChildren()) do
+        if pet:IsA("BasePart") and pet.Name == "PetMover" then
+            local uuid = pet:GetAttribute("UUID")
+            local model = uuid and pet:FindFirstChild(uuid)
+            
+            if model and model:IsA("Model") and model:GetAttribute("CurrentSkin") == nil then
+                local ok, cooldowns = pcall(getCooldown.InvokeServer, getCooldown, uuid)
+                if ok and type(cooldowns) == "table" then
+                    for _, cd in pairs(cooldowns) do
+                        if cd and cd.Time then
+                            local time = tonumber(cd.Time)
+                            if time and time >= 79 and time <= 81 and not tempAutoIdle then
+                                tempAutoIdle = true
+                                notify("Auto Idle", "Triggered by Echo Frog", 3)
+                                task.delay(10, function()
+                                    tempAutoIdle = false
+                                    notify("Auto Idle", "Echo Frog mode ended", 3)
+                                end)
+                                break
                             end
                         end
                     end
                 end
             end
         end
+    end
+end
+
+-- Moon Cat functionality
+local function handleMoonCat()
+    if not (config.idle or tempAutoIdle) then return end
+    
+    local modules = storage:FindFirstChild("Modules")
+    if not modules then return end
+    
+    local petServices = modules:FindFirstChild("PetServices")
+    if not petServices then return end
+    
+    local petActionUI = petServices:FindFirstChild("PetActionUserInterfaceService")
+    if not petActionUI then return end
+    
+    local petHandlers = petActionUI:FindFirstChild("PetActionsHandlers")
+    if not petHandlers then return end
+    
+    local idleHandler = petHandlers:FindFirstChild("Idle")
+    if not idleHandler then return end
+    
+    local success, handler = pcall(require, idleHandler)
+    if not success or not handler then return end
+    
+    local petsPhysical = workspace:FindFirstChild("PetsPhysical")
+    if not petsPhysical then return end
+    
+    for _, pet in pairs(petsPhysical:GetChildren()) do
+        if pet:IsA("BasePart") and pet.Name == "PetMover" then
+            local uuid = pet:GetAttribute("UUID")
+            if uuid then
+                local model = pet:FindFirstChild(uuid)
+                if model and model:IsA("Model") and model:GetAttribute("CurrentSkin") == "Moon Cat" then
+                    pcall(function()
+                        task.spawn(handler.Activate, pet)
+                    end)
+                end
+            end
+        end
+    end
+end
+
+-- Main loop
+task.spawn(function()
+    while running do
+        pcall(handleEchoFrog)
+        pcall(handleMoonCat)
         task.wait(1)
     end
 end)
 
---// Initialize UI and expose to global
 local gui = createGui()
 getgenv().ui = gui
+
+notify("Farm Helper", isMobile and "Touch to interact" or "Press Insert to toggle")
 
 getgenv().ui = {
     gui = gui,
     Destroy = function()
         running = false
-        uiActive = false
         if gui then gui:Destroy() end
     end
 }
-
-notify("Farm Helper", UserInputService.TouchEnabled and "Touch to interact" or "Press Insert to toggle")
