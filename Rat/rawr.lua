@@ -18,7 +18,6 @@ local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 
 local Player = Players.LocalPlayer
-local Mouse = Player:GetMouse() -- Mouse is generally not used for mobile drag directly
 
 --// Runtime Control
 local running = true -- Controls the main loops for auto-idle
@@ -85,8 +84,8 @@ local function createGui()
     -- Main container with modern styling
     local main = Instance.new("Frame")
     main.Name = "MainFrame"
-    main.Size = UDim2.new(0, 300, 0, 220) -- Reverted to original height, as one toggle is removed
-    main.Position = UDim2.new(0.5, -150, 0.5, -110) -- Reverted for original height
+    main.Size = UDim2.new(0, 300, 0, 220)
+    main.Position = UDim2.new(0.5, -150, 0.5, -110)
     main.BackgroundColor3 = Color3.fromRGB(18, 18, 20)
     main.BorderSizePixel = 0
     main.Parent = gui
@@ -146,11 +145,10 @@ local function createGui()
     local minimizeBtn = Instance.new("TextButton")
     minimizeBtn.Name = "MinimizeButton"
     minimizeBtn.Size = UDim2.new(0, UserInputService.TouchEnabled and 60 or 50, 0, UserInputService.TouchEnabled and 60 or 50)
-    -- Position: 0.05 scale from left, 0.4 scale from top, then adjust
     minimizeBtn.Position = UDim2.new(0.05, -minimizeBtn.Size.X.Offset / 2, 0.4, -minimizeBtn.Size.Y.Offset / 2)
-    minimizeBtn.BackgroundColor3 = Color3.fromRGB(52, 168, 83) -- Green like the original floating button
+    minimizeBtn.BackgroundColor3 = Color3.fromRGB(52, 168, 83)
     minimizeBtn.BorderSizePixel = 0
-    minimizeBtn.Text = UserInputService.TouchEnabled and "🐀" or "🌾" -- Use farming icon
+    minimizeBtn.Text = UserInputService.TouchEnabled and "🐀" or "🌾"
     minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     minimizeBtn.TextSize = UserInputService.TouchEnabled and 30 or 24
     minimizeBtn.Font = Enum.Font.GothamBold
@@ -158,7 +156,7 @@ local function createGui()
     minimizeBtn.Visible = false
 
     local minimizeBtnCorner = Instance.new("UICorner")
-    minimizeBtnCorner.CornerRadius = UDim.new(0.5, 0) -- Circular
+    minimizeBtnCorner.CornerRadius = UDim.new(0.5, 0)
     minimizeBtnCorner.Parent = minimizeBtn
 
     -- Add shadow effect to floating button
@@ -298,9 +296,9 @@ local function createGui()
     end
 
     -- Create UI elements
-    createToggle("AutoIdle", "Auto Idle", 1) -- Single Auto Idle toggle
+    createToggle("AutoIdle", "Auto Idle", 1)
     createToggle("Notifications", "Notifications", 2)
-    createButton("clear", "Clear Sprinklers", 3, function() -- Adjusted layout order
+    createButton("clear", "Clear Sprinklers", 3, function()
         clearSprinklers()
     end)
 
@@ -311,7 +309,6 @@ local function createGui()
         isMinimized = not isMinimized
 
         if isMinimized then
-            -- Hide main window, show minimize button
             TweenService:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
                 Size = UDim2.new(0, 0, 0, 0)
             }):Play()
@@ -320,24 +317,21 @@ local function createGui()
             main.Visible = false
             minimizeBtn.Visible = true
 
-            -- Animate minimize button in (no size change, it's already the target size)
             TweenService:Create(minimizeBtn, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
-                BackgroundTransparency = 0 -- Make visible
+                BackgroundTransparency = 0
             }):Play()
         else
-            -- Hide minimize button, show main window
             TweenService:Create(minimizeBtn, TweenInfo.new(0.2), {
-                BackgroundTransparency = 1 -- Make transparent
+                BackgroundTransparency = 1
             }):Play()
 
             task.wait(0.2)
             minimizeBtn.Visible = false
             main.Visible = true
 
-            -- Animate main window in
             main.Size = UDim2.new(0, 0, 0, 0)
             TweenService:Create(main, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
-                Size = UDim2.new(0, 300, 0, 220) -- Use updated size
+                Size = UDim2.new(0, 300, 0, 220)
             }):Play()
         end
     end
@@ -345,7 +339,7 @@ local function createGui()
     -- Close button functionality
     closeBtn.MouseButton1Click:Connect(function()
         running = false
-        uiActive = false -- Ensure UI loops stop
+        uiActive = false
         gui:Destroy()
     end)
 
@@ -353,20 +347,20 @@ local function createGui()
     local headerMinimizeBtn = Instance.new("TextButton")
     headerMinimizeBtn.Name = "MinimizeButton"
     headerMinimizeBtn.Size = UDim2.new(0, 32, 0, 32)
-    headerMinimizeBtn.Position = UDim2.new(1, -82, 0, 9) -- Position inside header
+    headerMinimizeBtn.Position = UDim2.new(1, -82, 0, 9)
     headerMinimizeBtn.BackgroundColor3 = Color3.fromRGB(255, 193, 7)
     headerMinimizeBtn.BorderSizePixel = 0
     headerMinimizeBtn.Text = "—"
     headerMinimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     headerMinimizeBtn.TextSize = 18
     headerMinimizeBtn.Font = Enum.Font.GothamBold
-    headerMinimizeBtn.Parent = header -- Parented to header
+    headerMinimizeBtn.Parent = header
     
     local headerMinimizeBtnCorner = Instance.new("UICorner")
     headerMinimizeBtnCorner.CornerRadius = UDim.new(0, 8)
     headerMinimizeBtnCorner.Parent = headerMinimizeBtn
 
-    headerMinimizeBtn.MouseButton1Click:Connect(toggleMinimize) -- Connect to the same toggle function
+    headerMinimizeBtn.MouseButton1Click:Connect(toggleMinimize)
 
     -- Button hover effects for close and minimize on main UI
     closeBtn.MouseEnter:Connect(function()
@@ -385,71 +379,73 @@ local function createGui()
         TweenService:Create(headerMinimizeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 193, 7)}):Play()
     end)
 
-    -- Dragging functionality for Main Frame (via Header)
-    local draggingMain = false
-    local dragStartMainOffset = Vector2.new() -- Use offset for better mobile drag
-    local initialPositionMain = UDim2.new()
+    -- **REFINED DRAGGING FUNCTIONALITY FOR MAIN FRAME**
+    local mainIsDragging = false
+    local mainDragStartPos = Vector2.new() -- Stores the initial mouse/touch position
+    local mainInitialUIPos = UDim2.new()   -- Stores the UI's position when drag starts
 
     header.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            draggingMain = true
-            dragStartMainOffset = input.Position - main.AbsolutePosition -- Calculate offset from top-left of UI
-            initialPositionMain = main.Position
-            UserInputService.InputEnded:Connect(function(endedInput)
+            mainIsDragging = true
+            mainDragStartPos = input.Position
+            mainInitialUIPos = main.Position
+
+            local inputEndedConn = UserInputService.InputEnded:Connect(function(endedInput)
                 if endedInput.UserInputType == Enum.UserInputType.MouseButton1 or endedInput.UserInputType == Enum.UserInputType.Touch then
-                    draggingMain = false
+                    mainIsDragging = false
+                    inputEndedConn:Disconnect() -- Disconnect this specific connection
                 end
             end)
         end
     end)
 
     UserInputService.InputChanged:Connect(function(input)
-        if draggingMain and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local newX = input.Position.X - dragStartMainOffset.X
-            local newY = input.Position.Y - dragStartMainOffset.Y
-            main.Position = UDim2.new(0, newX, 0, newY)
+        if mainIsDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - mainDragStartPos
+            main.Position = UDim2.new(mainInitialUIPos.X.Scale, mainInitialUIPos.X.Offset + delta.X,
+                                       mainInitialUIPos.Y.Scale, mainInitialUIPos.Y.Offset + delta.Y)
         end
     end)
-    -- InputEnded is now connected directly to InputBegan for drag
-    
-    -- Dragging functionality for the Minimized Button
-    local draggingMinimize = false
-    local dragStartMinimizeOffset = Vector2.new()
-    local initialPositionMinimize = UDim2.new()
+
+    -- **REFINED DRAGGING FUNCTIONALITY FOR MINIMIZED BUTTON**
+    local minimizeIsDragging = false
+    local minimizeDragStartPos = Vector2.new()
+    local minimizeInitialUIPos = UDim2.new()
 
     minimizeBtn.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            draggingMinimize = true
-            dragStartMinimizeOffset = input.Position - minimizeBtn.AbsolutePosition
-            initialPositionMinimize = minimizeBtn.Position
-            UserInputService.InputEnded:Connect(function(endedInput)
+            minimizeIsDragging = true
+            minimizeDragStartPos = input.Position
+            minimizeInitialUIPos = minimizeBtn.Position
+
+            local inputEndedConn = UserInputService.InputEnded:Connect(function(endedInput)
                 if endedInput.UserInputType == Enum.UserInputType.MouseButton1 or endedInput.UserInputType == Enum.UserInputType.Touch then
-                    draggingMinimize = false
+                    minimizeIsDragging = false
+                    inputEndedConn:Disconnect()
                 end
             end)
         end
     end)
 
     UserInputService.InputChanged:Connect(function(input)
-        if draggingMinimize and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local newX = input.Position.X - dragStartMinimizeOffset.X
-            local newY = input.Position.Y - dragStartMinimizeOffset.Y
-            minimizeBtn.Position = UDim2.new(0, newX, 0, newY)
+        if minimizeIsDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - minimizeDragStartPos
+            minimizeBtn.Position = UDim2.new(minimizeInitialUIPos.X.Scale, minimizeInitialUIPos.X.Offset + delta.X,
+                                              minimizeInitialUIPos.Y.Scale, minimizeInitialUIPos.Y.Offset + delta.Y)
         end
     end)
-    -- InputEnded is now connected directly to InputBegan for drag
 
     -- Toggle visibility with Insert key
     UserInputService.InputBegan:Connect(function(input)
         if input.KeyCode == Enum.KeyCode.Insert then
-            toggleMinimize() -- Use the same toggle function for Insert key
+            toggleMinimize()
         end
     end)
 
     return gui
 end
 
---// Clear Sprinklers Function
+--// Clear Sprinklers Function (Same as before)
 local function findGarden()
     local farm = workspace:FindFirstChild("Farm")
     if not farm then return nil end
@@ -544,7 +540,7 @@ function clearSprinklers()
     end
 end
 
---// Pet Idle Handler (Re-structured and combined)
+--// Pet Idle Handler (Same as before)
 local GetPetCooldown
 local IdleHandler
 
@@ -555,7 +551,6 @@ task.spawn(function()
     while running do
         if not uiActive then task.wait(1) continue end
 
-        -- Only run pet idling if the main AutoIdle toggle is ON
         if config.AutoIdle then
             local petsPhysical = workspace:FindFirstChild("PetsPhysical")
             if petsPhysical then
@@ -567,31 +562,20 @@ task.spawn(function()
                         if petModel and petModel:IsA("Model") then
                             local currentSkin = petModel:GetAttribute("CurrentSkin")
 
-                            -- Always idle Moon Cat or Triceratops
                             if currentSkin == "Moon Cat" or currentSkin == "Triceratops" then
                                 task.spawn(IdleHandler.Activate, petMover)
-                            -- Echo Frog / Generic Pet Auto Idle (based on cooldown)
-                            elseif not currentSkin then -- If no specific skin (generic pet, like Echo Frog)
+                            elseif not currentSkin then
                                 local ok, cooldowns = pcall(GetPetCooldown.InvokeServer, GetPetCooldown, uuid)
                                 if ok and typeof(cooldowns) == "table" then
                                     for _, cd in ipairs(cooldowns) do
                                         local time = tonumber(cd.Time)
                                         if time and time >= 79 and time <= 81 then
-                                            -- This is the exact Echo Frog logic from the short script
                                             notify({
                                                 Title = "Auto Idle",
                                                 Description = "True",
                                                 Time = 3,
                                             })
-                                            -- The short script used a temporary global for AutoIdle,
-                                            -- but since we have a single toggle, the notification is the main "effect"
-                                            -- We'll still call the handler.
                                             task.spawn(IdleHandler.Activate, petMover)
-                                            -- The short script had a delay to set AutoIdle = false,
-                                            -- but that was a specific behavior for *its* AutoIdle system.
-                                            -- With a combined system, we just activate the pet and let the loop continue.
-                                            -- If you want the *entire* AutoIdle to turn off after 10s based on ANY Echo Frog proc,
-                                            -- let me know, but that's a less common behavior for a single toggle.
                                             break
                                         end
                                     end
