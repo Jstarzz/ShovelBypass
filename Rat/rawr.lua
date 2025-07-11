@@ -4,9 +4,7 @@
     Last Update: 10/07/2025
     DD/MM/YYYY
 ]]--
-
 if game.PlaceId ~= 126884695634066 then return end
-
 local players = game:GetService("Players")
 local storage = game:GetService("ReplicatedStorage")
 local input = game:GetService("UserInputService")
@@ -15,11 +13,9 @@ local run = game:GetService("RunService")
 local http = game:GetService("HttpService")
 local player = players.LocalPlayer
 local mouse = player:GetMouse()
-
 if getgenv().FarmHelper then
     getgenv().FarmHelper:Destroy()
 end
-
 local running = true
 local config = {
     AutoIdleToggle = false,
@@ -33,16 +29,13 @@ local config = {
     SelectedPlants = {},
     FruitHoverDisplay = true,
 }
-
 local folder = "farmtool"
 local file = folder .. "/config.json"
 local isMobile = input.TouchEnabled and not input.KeyboardEnabled
-
 local function saveConfig()
     if not isfolder(folder) then makefolder(folder) end
     writefile(file, http:JSONEncode(config))
 end
-
 local function loadConfig()
     if isfile(file) then
         local ok, data = pcall(function()
@@ -57,9 +50,7 @@ local function loadConfig()
         end
     end
 end
-
 loadConfig()
-
 local function showNotification(title, text)
     if not config.notify then return end
     game:GetService("StarterGui"):SetCore("SendNotification", {
@@ -68,7 +59,6 @@ local function showNotification(title, text)
         Duration = 2
     })
 end
-
 local BuySeedStockRemote = storage.GameEvents.BuySeedStock
 local BuyGearStockRemote = storage.GameEvents.BuyGearStock
 local BuyPetEggRemote = storage.GameEvents.BuyPetEgg
@@ -76,7 +66,6 @@ local GetPetCooldown = storage.GameEvents.GetPetCooldown
 local Remove_Item = storage.GameEvents.Remove_Item
 local DeleteObject = storage.GameEvents.DeleteObject
 local IdleHandler = require(storage.Modules.PetServices.PetActionUserInterfaceService.PetActionsHandlers.Idle)
-
 local seedTypes = {
     "Apple", "Avocado", "Bamboo", "Banana", "Beanstalk", "Bell Pepper", "Blueberry", "Burning Bud",
     "Cacao", "Cactus", "Carrot", "Cauliflower", "Chocolate Carrot", "Coconut", "Corn", "Cranberry",
@@ -84,18 +73,15 @@ local seedTypes = {
     "Mango", "Mushroom", "Orange Tulip", "Pepper", "Pineapple", "Pitcher Plant", "Prickly Pear",
     "Pumpkin", "Rafflesia", "Strawberry", "Sugar Apple", "Tomato", "Watermelon"
 }
-
 local eggTypes = {
     "Bee Egg", "Bug Egg", "Common Egg", "Common Summer Egg", "Legendary Egg",
     "Mythical Egg", "Paradise Egg", "Rare Egg", "Rare Summer Egg", "Uncommon Egg"
 }
-
 local gearTypes = {
     "Advanced Sprinkler", "Basic Sprinkler", "Cleaning Spray", "Favorite Tool",
     "Friendship Pot", "Godly Sprinkler", "Harvest Tool", "Magnifying Glass",
     "Master Sprinkler", "Recall Wrench", "Tanning Mirror", "Trowel", "Watering Can"
 }
-
 local plantTypes = {
     "Apple", "Avocado", "Bamboo", "Banana", "Beanstalk", "Bell Pepper", "Blueberry",
     "Bone Blossom", "Boneboo", "Burning Bud", "Cacao", "Cactus", "Candy Blossom",
@@ -108,7 +94,6 @@ local plantTypes = {
     "Starfruit", "Stonebite", "Strawberry", "Sugar Apple", "Sugar Moon", "Sunflower",
     "Tomato", "Traveler's Fruit", "Watermelon"
 }
-
 local function findShovel()
     local character = player.Character or player.CharacterAdded:Wait()
     local backpack = player.Backpack
@@ -127,7 +112,6 @@ local function findShovel()
     
     return false
 end
-
 local function putAwayShovel()
     local character = player.Character
     if not character then return end
@@ -136,7 +120,6 @@ local function putAwayShovel()
         equipped.Parent = player.Backpack
     end
 end
-
 local function findMyGarden()
     for _, plot in pairs(workspace.Farm:GetChildren()) do
         if plot.Important and plot.Important.Data and plot.Important.Data.Owner.Value == player.Name then
@@ -145,30 +128,25 @@ local function findMyGarden()
     end
     return nil
 end
-
 local function createMainUI()
     local screenUI = Instance.new("ScreenGui")
     screenUI.Name = "FarmHelperUI"
     screenUI.Parent = player.PlayerGui
     screenUI.ResetOnSpawn = false
     screenUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
     local mainFrame = Instance.new("Frame")
     mainFrame.Size = UDim2.new(0, 320, 0, 400)
     mainFrame.Position = UDim2.new(0.5, -160, 0.5, -200)
     mainFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 32)
     mainFrame.BorderSizePixel = 0
     mainFrame.Parent = screenUI
-
     local mainCorner = Instance.new("UICorner")
     mainCorner.CornerRadius = UDim.new(0, 12)
     mainCorner.Parent = mainFrame
-
     local header = Instance.new("Frame")
     header.Size = UDim2.new(1, 0, 0, 50)
     header.BackgroundTransparency = 1
     header.Parent = mainFrame
-
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(1, -100, 1, 0)
     title.Position = UDim2.new(0, 20, 0, 0)
@@ -179,7 +157,6 @@ local function createMainUI()
     title.TextXAlignment = Enum.TextXAlignment.Left
     title.Font = Enum.Font.GothamBold
     title.Parent = header
-
     local closeBtn = Instance.new("TextButton")
     closeBtn.Size = UDim2.new(0, 32, 0, 32)
     closeBtn.Position = UDim2.new(1, -45, 0, 9)
@@ -190,11 +167,9 @@ local function createMainUI()
     closeBtn.TextSize = 18
     closeBtn.Font = Enum.Font.GothamBold
     closeBtn.Parent = header
-
     local closeCorner = Instance.new("UICorner")
     closeCorner.CornerRadius = UDim.new(0, 8)
     closeCorner.Parent = closeBtn
-
     local minimizeBtn = Instance.new("TextButton")
     minimizeBtn.Size = UDim2.new(0, 32, 0, 32)
     minimizeBtn.Position = UDim2.new(1, -82, 0, 9)
@@ -205,26 +180,21 @@ local function createMainUI()
     minimizeBtn.TextSize = 18
     minimizeBtn.Font = Enum.Font.GothamBold
     minimizeBtn.Parent = header
-
     local minimizeCorner = Instance.new("UICorner")
     minimizeCorner.CornerRadius = UDim.new(0, 8)
     minimizeCorner.Parent = minimizeBtn
-
     local tabs = {"Farm", "Shop", "Shovel", "Settings"}
     local tabButtons = {}
     local tabFrames = {}
-
     local tabContainer = Instance.new("Frame")
     tabContainer.Size = UDim2.new(1, -24, 0, 36)
     tabContainer.Position = UDim2.new(0, 12, 0, 58)
     tabContainer.BackgroundTransparency = 1
     tabContainer.Parent = mainFrame
-
     local tabLayout = Instance.new("UIListLayout")
     tabLayout.FillDirection = Enum.FillDirection.Horizontal
     tabLayout.Padding = UDim.new(0, 6)
     tabLayout.Parent = tabContainer
-
     for i, tabName in ipairs(tabs) do
         local tabBtn = Instance.new("TextButton")
         tabBtn.Size = UDim2.new(0.25, -6, 1, 0)
@@ -270,7 +240,6 @@ local function createMainUI()
         
         tabFrames[tabName] = tabFrame
     end
-
     local function makeToggle(name, text, order, parent)
         local toggleFrame = Instance.new("Frame")
         toggleFrame.Size = UDim2.new(1, 0, 0, 36)
@@ -278,11 +247,9 @@ local function createMainUI()
         toggleFrame.BorderSizePixel = 0
         toggleFrame.LayoutOrder = order
         toggleFrame.Parent = parent
-
         local toggleCorner = Instance.new("UICorner")
         toggleCorner.CornerRadius = UDim.new(0, 8)
         toggleCorner.Parent = toggleFrame
-
         local toggleLabel = Instance.new("TextLabel")
         toggleLabel.Size = UDim2.new(1, -60, 1, 0)
         toggleLabel.Position = UDim2.new(0, 16, 0, 0)
@@ -293,47 +260,37 @@ local function createMainUI()
         toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
         toggleLabel.Font = Enum.Font.Gotham
         toggleLabel.Parent = toggleFrame
-
         local toggleSwitch = Instance.new("Frame")
         toggleSwitch.Size = UDim2.new(0, 44, 0, 24)
         toggleSwitch.Position = UDim2.new(1, -56, 0.5, -12)
         toggleSwitch.BackgroundColor3 = Color3.fromRGB(70, 70, 75)
         toggleSwitch.BorderSizePixel = 0
         toggleSwitch.Parent = toggleFrame
-
         local switchCorner = Instance.new("UICorner")
         switchCorner.CornerRadius = UDim.new(0, 12)
         switchCorner.Parent = toggleSwitch
-
         local switchKnob = Instance.new("Frame")
         switchKnob.Size = UDim2.new(0, 18, 0, 18)
         switchKnob.Position = UDim2.new(0, 3, 0.5, -9)
         switchKnob.BackgroundColor3 = Color3.fromRGB(250, 250, 250)
         switchKnob.BorderSizePixel = 0
         switchKnob.Parent = toggleSwitch
-
         local knobCorner = Instance.new("UICorner")
         knobCorner.CornerRadius = UDim.new(0, 9)
         knobCorner.Parent = switchKnob
-
         local switchButton = Instance.new("TextButton")
         switchButton.Size = UDim2.new(1, 0, 1, 0)
         switchButton.BackgroundTransparency = 1
         switchButton.Text = ""
         switchButton.Parent = toggleSwitch
-
         local state = config[name] or false
-
         local function updateToggle()
             local bgColor = state and Color3.fromRGB(70, 180, 90) or Color3.fromRGB(70, 70, 75)
             local knobPos = state and UDim2.new(0, 23, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
-
             tween:Create(toggleSwitch, TweenInfo.new(0.15), {BackgroundColor3 = bgColor}):Play()
             tween:Create(switchKnob, TweenInfo.new(0.15), {Position = knobPos}):Play()
         end
-
         updateToggle()
-
         switchButton.MouseButton1Click:Connect(function()
             state = not state
             config[name] = state
@@ -341,10 +298,8 @@ local function createMainUI()
             saveConfig()
             showNotification("Settings", text .. " " .. (state and "enabled" or "disabled"))
         end)
-
         return toggleFrame
     end
-
     local function makeButton(name, text, order, callback, parent)
         local button = Instance.new("TextButton")
         button.Size = UDim2.new(1, 0, 0, 36)
@@ -356,16 +311,12 @@ local function createMainUI()
         button.Font = Enum.Font.GothamBold
         button.LayoutOrder = order
         button.Parent = parent
-
         local buttonCorner = Instance.new("UICorner")
         buttonCorner.CornerRadius = UDim.new(0, 8)
         buttonCorner.Parent = button
-
         button.MouseButton1Click:Connect(callback)
-
         return button
     end
-
     local farmTab = tabFrames["Farm"]
     makeToggle("AutoIdleToggle", "Auto Idle Pets", 1, farmTab)
     makeToggle("notify", "Show Notifications", 2, farmTab)
@@ -399,12 +350,10 @@ local function createMainUI()
         putAwayShovel()
         showNotification("Done", "Sprinklers removed")
     end, farmTab)
-
     local shopTab = tabFrames["Shop"]
     makeToggle("AutoBuySeeds", "Auto Buy Seeds", 1, shopTab)
     makeToggle("AutoBuyGear", "Auto Buy Gear", 2, shopTab)
     makeToggle("AutoBuyEggs", "Auto Buy Eggs", 3, shopTab)
-
     local shovelTab = tabFrames["Shovel"]
     makeToggle("AutoShovelFruitsToggle", "Auto Shovel Fruits", 1, shovelTab)
     
@@ -599,20 +548,16 @@ local function createMainUI()
         task.wait(0.5)
         loadfile("FarmHelper.lua")()
     end, settingsTab)
-
     closeBtn.MouseButton1Click:Connect(function()
         running = false
         screenUI:Destroy()
     end)
-
     minimizeBtn.MouseButton1Click:Connect(function()
         mainFrame.Visible = not mainFrame.Visible
     end)
-
     local dragging = false
     local dragStart = nil
     local startPos = nil
-
     header.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
@@ -620,36 +565,29 @@ local function createMainUI()
             startPos = mainFrame.Position
         end
     end)
-
     input.InputChanged:Connect(function(input)
         if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
             local delta = input.Position - dragStart
             mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
-
     input.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = false
         end
     end)
-
     input.InputBegan:Connect(function(input)
         if input.KeyCode == Enum.KeyCode.Insert then
             mainFrame.Visible = not mainFrame.Visible
         end
     end)
-
     return screenUI
 end
-
 local mainUI = createMainUI()
 getgenv().FarmHelper = mainUI
 showNotification("Farm Assistant", "Press Insert to toggle UI")
-
 getgenv().AutoIdle = false
 getgenv().AutoIdleToggle = config.AutoIdleToggle
-
 task.spawn(function()
     while running do
         if getgenv().AutoIdle then
@@ -665,7 +603,6 @@ task.spawn(function()
         task.wait()
     end
 end)
-
 task.spawn(function()
     while running do
         if getgenv().AutoIdleToggle then 
@@ -673,7 +610,6 @@ task.spawn(function()
                 if pet:IsA("BasePart") and pet.Name == "PetMover" then
                     local uuid = pet:GetAttribute("UUID")
                     local model = uuid and pet:FindFirstChild(uuid)
-
                     if model and model:GetAttribute("CurrentSkin") == nil then
                         local success, cooldowns = pcall(GetPetCooldown.InvokeServer, GetPetCooldown, uuid)
                         if success and type(cooldowns) == "table" then
@@ -697,7 +633,6 @@ task.spawn(function()
         task.wait(1)
     end
 end)
-
 task.spawn(function()
     while running do
         if config.AutoBuySeeds then
@@ -711,7 +646,6 @@ task.spawn(function()
         end
     end
 end)
-
 task.spawn(function()
     while running do
         if config.AutoBuyGear then
@@ -725,7 +659,6 @@ task.spawn(function()
         end
     end
 end)
-
 task.spawn(function()
     while running do
         if config.AutoBuyEggs then
@@ -739,7 +672,6 @@ task.spawn(function()
         end
     end
 end)
-
 task.spawn(function()
     while running do
         if config.AutoShovelFruitsToggle and #config.SelectedPlants > 0 then
@@ -754,6 +686,10 @@ task.spawn(function()
                             local fruits = plant:FindFirstChild("Fruits")
                             if fruits then
                                 for _, fruit in ipairs(fruits:GetChildren()) do
+                                    if fruit:GetAttribute("Favorited") == true then
+                                        continue
+                                    end
+                                    
                                     local weight = fruit:FindFirstChild("Weight")
                                     if weight and weight:IsA("NumberValue") then
                                         local shouldRemove = false
@@ -785,7 +721,6 @@ task.spawn(function()
         task.wait(5)
     end
 end)
-
 task.spawn(function()
     local weightDisplay = Instance.new("ScreenGui")
     weightDisplay.Name = "FruitWeightDisplay"
