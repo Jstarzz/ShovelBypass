@@ -757,9 +757,6 @@ local mainUI = createMainUI()
 getgenv().FarmHelper = mainUI
 showNotification("Farm Assistant", isMobile and "Tap 🌾 to toggle UI" or "Press Insert or tap 🌾 to toggle UI")
 
--- =====================================================================
--- FIXED AUTO IDLE FUNCTIONALITY (MOON CAT + ECHO FROG)
--- =====================================================================
 
 -- Global state variables
 getgenv().AutoIdle = false
@@ -789,7 +786,7 @@ task.spawn(function()
     end
 end)
 
--- Echo Frog cooldown monitoring
+-- Echo Frog cooldown thing
 task.spawn(function()
     while running do
         if getgenv().AutoIdleToggle then 
