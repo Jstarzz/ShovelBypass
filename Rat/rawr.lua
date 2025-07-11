@@ -135,14 +135,14 @@ local function createMainUI()
     gui.ResetOnSpawn = false
     gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     
-    -- Easily adjustable UI dimensions
+    
     local uiDimensions = {
         desktop = {
             width = 300,
             height = 450
         },
         mobile = {
-            width = 300,  -- Same width as desktop
+            width = 300,  
             height = 360  -- 20% shorter than desktop (450 * 0.8 = 360)
         }
     }
@@ -155,7 +155,7 @@ local function createMainUI()
     mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
     mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     mainFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 32)
-    mainFrame.BackgroundTransparency = 0.1  -- Translucent background
+    mainFrame.BackgroundTransparency = 0.1 
     mainFrame.BorderSizePixel = 0
     mainFrame.Parent = gui
     
@@ -607,7 +607,7 @@ local function createMainUI()
     local floatingBtn = Instance.new("TextButton")
     floatingBtn.Name = "FloatingButton"
     floatingBtn.Size = UDim2.new(0, 50, 0, 50)
-    floatingBtn.Position = UDim2.new(0, 20, 0.4, 0) -- Left side, slightly above center
+    floatingBtn.Position = UDim2.new(0, 20, 0.4, 0) -- pon the left, little bit above the center ig
     floatingBtn.AnchorPoint = Vector2.new(0, 0.4)
     floatingBtn.BackgroundColor3 = Color3.fromRGB(52, 168, 83)
     floatingBtn.BorderSizePixel = 0
@@ -741,7 +741,7 @@ local function createMainUI()
         end
     end)
     
-    -- Insert key only for PC
+    -- Insert key ONLYY for PC
     if not isMobile then
         input.InputBegan:Connect(function(input)
             if input.KeyCode == Enum.KeyCode.Insert then
