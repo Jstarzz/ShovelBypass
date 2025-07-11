@@ -97,12 +97,16 @@ local gearTypes = {
 }
 
 local plantTypes = {
-    "Apple", "Avocado", "Bamboo", "Banana", "Beanstalk", "Bell Pepper", "Blueberry", 
-    "Burning Bud", "Cacao", "Cactus", "Carrot", "Cauliflower", "Chocolate Carrot", 
-    "Coconut", "Corn", "Cranberry", "Daffodil", "Dragon Fruit", "Ember Lily", "Feijoa", 
-    "Grape", "Green Apple", "Kiwi", "Loquat", "Mango", "Mushroom", "Orange Tulip", 
-    "Pepper", "Pineapple", "Pitcher Plant", "Prickly Pear", "Pumpkin", "Rafflesia", 
-    "Strawberry", "Sugar Apple", "Tomato", "Watermelon"
+    "Apple", "Avocado", "Bamboo", "Banana", "Beanstalk", "Bell Pepper", "Blueberry",
+    "Bone Blossom", "Boneboo", "Burning Bud", "Cacao", "Cactus", "Candy Blossom",
+    "Carrot", "Cauliflower", "Chocolate Carrot", "Cocovine", "Coconut", "Corn",
+    "Cranberry", "Daffodil", "Dragon Fruit", "Durian", "Elephant Fruit", "Ember Lily",
+    "Feijoa", "Firefly Fern", "Fossilight", "Grape", "Green Apple", "Honeysuckle",
+    "Horned Dinoshroom", "Kiwi", "Loquat", "Mango", "Moon Mango", "Mushroom",
+    "Orange Tulip", "Papaya", "Paradise Petal", "Parasol Flower", "Passionfruit",
+    "Pepper", "Pineapple", "Pitcher Plant", "Prickly Pear", "Pumpkin", "Rafflesia",
+    "Starfruit", "Stonebite", "Strawberry", "Sugar Apple", "Sugar Moon", "Sunflower",
+    "Tomato", "Traveler's Fruit", "Watermelon"
 }
 
 local function findShovel()
