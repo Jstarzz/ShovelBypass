@@ -135,14 +135,14 @@ local function createMainUI()
     gui.ResetOnSpawn = false
     gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     
-    
+    -- Easily adjustable UI dimensions
     local uiDimensions = {
         desktop = {
             width = 300,
             height = 450
         },
         mobile = {
-            width = 300,  
+            width = 300,  -- Same width as desktop
             height = 360  -- 20% shorter than desktop (450 * 0.8 = 360)
         }
     }
@@ -155,7 +155,7 @@ local function createMainUI()
     mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
     mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     mainFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 32)
-    mainFrame.BackgroundTransparency = 0.1 
+    mainFrame.BackgroundTransparency = 0.1  -- Translucent background
     mainFrame.BorderSizePixel = 0
     mainFrame.Parent = gui
     
@@ -607,7 +607,7 @@ local function createMainUI()
     local floatingBtn = Instance.new("TextButton")
     floatingBtn.Name = "FloatingButton"
     floatingBtn.Size = UDim2.new(0, 50, 0, 50)
-    floatingBtn.Position = UDim2.new(0, 20, 0.4, 0) -- pon the left, little bit above the center ig
+    floatingBtn.Position = UDim2.new(0, 20, 0.4, 0) -- Left side, slightly above center
     floatingBtn.AnchorPoint = Vector2.new(0, 0.4)
     floatingBtn.BackgroundColor3 = Color3.fromRGB(52, 168, 83)
     floatingBtn.BorderSizePixel = 0
@@ -741,7 +741,7 @@ local function createMainUI()
         end
     end)
     
-    -- Insert key ONLYY for PC
+    -- Insert key only for PC
     if not isMobile then
         input.InputBegan:Connect(function(input)
             if input.KeyCode == Enum.KeyCode.Insert then
@@ -757,18 +757,30 @@ local mainUI = createMainUI()
 getgenv().FarmHelper = mainUI
 showNotification("Farm Assistant", isMobile and "Tap 🌾 to toggle UI" or "Press Insert or tap 🌾 to toggle UI")
 
--- [Auto Idle Pets]
+-- =====================================================================
+-- FIXED AUTO IDLE FUNCTIONALITY (MOON CAT + ECHO FROG)
+-- =====================================================================
+
+-- Global state variables
 getgenv().AutoIdle = false
 getgenv().AutoIdleToggle = config.AutoIdleToggle
 
+-- Main Auto Idle task
 task.spawn(function()
     while running do
         if getgenv().AutoIdle then
             for _, pet in ipairs(workspace.PetsPhysical:GetChildren()) do
                 if pet:IsA("BasePart") and pet.Name == "PetMover" then
                     local model = pet:FindFirstChild(pet:GetAttribute("UUID"))
-                    if model and model:GetAttribute("CurrentSkin") == "Moon Cat" then
-                        task.spawn(IdleHandler.Activate, pet)
+                    if model and model:IsA("Model") then
+                        -- Activate for Moon Cat
+                        if model:GetAttribute("CurrentSkin") == "Moon Cat" then
+                            task.spawn(IdleHandler.Activate, pet)
+                        end
+                        -- Activate for Echo Frog
+                        if model:GetAttribute("CurrentSkin") == "Echo Frog" then
+                            task.spawn(IdleHandler.Activate, pet)
+                        end
                     end
                 end
             end
@@ -777,6 +789,7 @@ task.spawn(function()
     end
 end)
 
+-- Echo Frog cooldown monitoring
 task.spawn(function()
     while running do
         if getgenv().AutoIdleToggle then 
@@ -784,18 +797,24 @@ task.spawn(function()
                 if pet:IsA("BasePart") and pet.Name == "PetMover" then
                     local uuid = pet:GetAttribute("UUID")
                     local model = uuid and pet:FindFirstChild(uuid)
-                    if model and model:GetAttribute("CurrentSkin") == nil then
+                    
+                    -- Check for Echo Frog without skin
+                    if model and model:IsA("Model") and model:GetAttribute("CurrentSkin") == nil then
                         local success, cooldowns = pcall(GetPetCooldown.InvokeServer, GetPetCooldown, uuid)
                         if success and type(cooldowns) == "table" then
                             for _, cd in ipairs(cooldowns) do
                                 local time = tonumber(cd.Time)
+                                -- Trigger when cooldown is between 79-81 seconds
                                 if time and time >= 79 and time <= 81 and not getgenv().AutoIdle then
                                     showNotification("Auto Idle", "Activated")
                                     getgenv().AutoIdle = true
+                                    
+                                    -- Deactivate after 10 seconds
                                     task.delay(10, function()
                                         getgenv().AutoIdle = false
                                         showNotification("Auto Idle", "Deactivated")
                                     end)
+                                    
                                     break
                                 end
                             end
@@ -803,6 +822,9 @@ task.spawn(function()
                     end
                 end
             end
+        else
+            -- Disable auto idle when toggle is off
+            getgenv().AutoIdle = false
         end
         task.wait(1)
     end
