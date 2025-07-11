@@ -129,54 +129,55 @@ local function findMyGarden()
     return nil
 end
 local function createMainUI()
-    local screenUI = Instance.new("ScreenGui")
-    screenUI.Name = "FarmHelperUI"
-    screenUI.Parent = player.PlayerGui
-    screenUI.ResetOnSpawn = false
-    screenUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "FarmHelperUI"
+    gui.Parent = player.PlayerGui
+    gui.ResetOnSpawn = false
+    gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     
-    -- Mobile-friendly dimensions
+    -- Mobile-friendly dimensions - SMALLER and LONGER
     local mainFrame = Instance.new("Frame")
     if isMobile then
-        mainFrame.Size = UDim2.new(0.85, 0, 0.6, 0)
+        mainFrame.Size = UDim2.new(0.75, 0, 0.7, 0) -- Smaller width, taller height
     else
-        mainFrame.Size = UDim2.new(0, 320, 0, 400)
+        mainFrame.Size = UDim2.new(0, 300, 0, 450) -- Slightly taller for desktop
     end
     mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
     mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     mainFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 32)
     mainFrame.BackgroundTransparency = 0.1  -- Translucent background
     mainFrame.BorderSizePixel = 0
-    mainFrame.Parent = screenUI
+    mainFrame.Parent = gui
     
     local mainCorner = Instance.new("UICorner")
     mainCorner.CornerRadius = UDim.new(0, 12)
     mainCorner.Parent = mainFrame
     
     local header = Instance.new("Frame")
-    header.Size = UDim2.new(1, 0, 0, isMobile and 60 or 50)
+    header.Size = UDim2.new(1, 0, 0, isMobile and 50 or 40)
     header.BackgroundTransparency = 1
     header.Parent = mainFrame
     
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(1, -100, 1, 0)
-    title.Position = UDim2.new(0, 20, 0, 0)
+    title.Position = UDim2.new(0, 12, 0, 0)
     title.BackgroundTransparency = 1
     title.Text = "Farm Assistant"
     title.TextColor3 = Color3.fromRGB(240, 240, 240)
-    title.TextSize = isMobile and 16 or 18
+    title.TextSize = isMobile and 16 or 16
     title.TextXAlignment = Enum.TextXAlignment.Left
     title.Font = Enum.Font.GothamBold
     title.Parent = header
     
     local closeBtn = Instance.new("TextButton")
-    closeBtn.Size = UDim2.new(0, isMobile and 44 or 32, 0, isMobile and 44 or 32)
-    closeBtn.Position = UDim2.new(1, -45, 0, 9)
+    closeBtn.Size = UDim2.new(0, isMobile and 40 or 32, 0, isMobile and 40 or 32)
+    closeBtn.Position = UDim2.new(1, -45, 0.5, -20)
+    closeBtn.AnchorPoint = Vector2.new(0, 0.5)
     closeBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 60)
     closeBtn.BorderSizePixel = 0
     closeBtn.Text = "×"
     closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    closeBtn.TextSize = isMobile and 16 or 18
+    closeBtn.TextSize = isMobile and 20 or 18
     closeBtn.Font = Enum.Font.GothamBold
     closeBtn.Parent = header
     
@@ -185,13 +186,14 @@ local function createMainUI()
     closeCorner.Parent = closeBtn
     
     local minimizeBtn = Instance.new("TextButton")
-    minimizeBtn.Size = UDim2.new(0, isMobile and 44 or 32, 0, isMobile and 44 or 32)
-    minimizeBtn.Position = UDim2.new(1, isMobile and -94 or -82, 0, 9)
+    minimizeBtn.Size = UDim2.new(0, isMobile and 40 or 32, 0, isMobile and 40 or 32)
+    minimizeBtn.Position = UDim2.new(1, isMobile and -90 or -82, 0.5, -20)
+    minimizeBtn.AnchorPoint = Vector2.new(0, 0.5)
     minimizeBtn.BackgroundColor3 = Color3.fromRGB(240, 180, 50)
     minimizeBtn.BorderSizePixel = 0
     minimizeBtn.Text = "—"
     minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    minimizeBtn.TextSize = isMobile and 16 or 18
+    minimizeBtn.TextSize = isMobile and 20 or 18
     minimizeBtn.Font = Enum.Font.GothamBold
     minimizeBtn.Parent = header
     
@@ -204,8 +206,8 @@ local function createMainUI()
     local tabFrames = {}
     
     local tabContainer = Instance.new("Frame")
-    tabContainer.Size = UDim2.new(1, -24, 0, isMobile and 44 or 36)
-    tabContainer.Position = UDim2.new(0, 12, 0, isMobile and 68 or 58)
+    tabContainer.Size = UDim2.new(1, -24, 0, isMobile and 40 or 36)
+    tabContainer.Position = UDim2.new(0, 12, 0, isMobile and 55 or 45)
     tabContainer.BackgroundTransparency = 1
     tabContainer.Parent = mainFrame
     
@@ -221,7 +223,7 @@ local function createMainUI()
         tabBtn.BorderSizePixel = 0
         tabBtn.Text = tabName
         tabBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
-        tabBtn.TextSize = isMobile and 13 or 14
+        tabBtn.TextSize = isMobile and 12 or 12
         tabBtn.Font = Enum.Font.Gotham
         tabBtn.Parent = tabContainer
         
@@ -243,13 +245,8 @@ local function createMainUI()
         tabButtons[tabName] = tabBtn
         
         local tabFrame = Instance.new("ScrollingFrame")
-        if isMobile then
-            tabFrame.Size = UDim2.new(1, -24, 1, -120)
-            tabFrame.Position = UDim2.new(0, 12, 0, 120)
-        else
-            tabFrame.Size = UDim2.new(1, -24, 1, -100)
-            tabFrame.Position = UDim2.new(0, 12, 0, 100)
-        end
+        tabFrame.Size = UDim2.new(1, -24, 1, -100)
+        tabFrame.Position = UDim2.new(0, 12, 0, isMobile and 100 or 90)
         tabFrame.BackgroundTransparency = 1
         tabFrame.Visible = i == 1
         tabFrame.ScrollBarThickness = 4
@@ -259,7 +256,7 @@ local function createMainUI()
         
         local tabList = Instance.new("UIListLayout")
         tabList.SortOrder = Enum.SortOrder.LayoutOrder
-        tabList.Padding = UDim.new(0, 10)
+        tabList.Padding = UDim.new(0, 8)
         tabList.Parent = tabFrame
         
         tabFrames[tabName] = tabFrame
@@ -267,7 +264,7 @@ local function createMainUI()
     
     local function makeToggle(name, text, order, parent)
         local toggleFrame = Instance.new("Frame")
-        toggleFrame.Size = UDim2.new(1, 0, 0, isMobile and 44 or 36)
+        toggleFrame.Size = UDim2.new(1, 0, 0, isMobile and 36 or 32)
         toggleFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
         toggleFrame.BorderSizePixel = 0
         toggleFrame.LayoutOrder = order
@@ -278,19 +275,19 @@ local function createMainUI()
         toggleCorner.Parent = toggleFrame
         
         local toggleLabel = Instance.new("TextLabel")
-        toggleLabel.Size = UDim2.new(1, -60, 1, 0)
-        toggleLabel.Position = UDim2.new(0, 16, 0, 0)
+        toggleLabel.Size = UDim2.new(1, -50, 1, 0)
+        toggleLabel.Position = UDim2.new(0, 12, 0, 0)
         toggleLabel.BackgroundTransparency = 1
         toggleLabel.Text = text
         toggleLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-        toggleLabel.TextSize = isMobile and 13 or 14
+        toggleLabel.TextSize = isMobile and 12 or 12
         toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
         toggleLabel.Font = Enum.Font.Gotham
         toggleLabel.Parent = toggleFrame
         
         local toggleSwitch = Instance.new("Frame")
-        toggleSwitch.Size = UDim2.new(0, isMobile and 50 or 44, 0, isMobile and 28 or 24)
-        toggleSwitch.Position = UDim2.new(1, -56, 0.5, -14)
+        toggleSwitch.Size = UDim2.new(0, isMobile and 42 or 38, 0, isMobile and 22 or 20)
+        toggleSwitch.Position = UDim2.new(1, -45, 0.5, -11)
         toggleSwitch.BackgroundColor3 = Color3.fromRGB(70, 70, 75)
         toggleSwitch.BorderSizePixel = 0
         toggleSwitch.Parent = toggleFrame
@@ -300,14 +297,14 @@ local function createMainUI()
         switchCorner.Parent = toggleSwitch
         
         local switchKnob = Instance.new("Frame")
-        switchKnob.Size = UDim2.new(0, isMobile and 22 or 18, 0, isMobile and 22 or 18)
-        switchKnob.Position = UDim2.new(0, 3, 0.5, -11)
+        switchKnob.Size = UDim2.new(0, isMobile and 18 or 16, 0, isMobile and 18 or 16)
+        switchKnob.Position = UDim2.new(0, 3, 0.5, -9)
         switchKnob.BackgroundColor3 = Color3.fromRGB(250, 250, 250)
         switchKnob.BorderSizePixel = 0
         switchKnob.Parent = toggleSwitch
         
         local knobCorner = Instance.new("UICorner")
-        knobCorner.CornerRadius = UDim.new(0, 11)
+        knobCorner.CornerRadius = UDim.new(0, 9)
         knobCorner.Parent = switchKnob
         
         local switchButton = Instance.new("TextButton")
@@ -319,7 +316,7 @@ local function createMainUI()
         local state = config[name] or false
         local function updateToggle()
             local bgColor = state and Color3.fromRGB(70, 180, 90) or Color3.fromRGB(70, 70, 75)
-            local knobPos = state and UDim2.new(0, 25, 0.5, -11) or UDim2.new(0, 3, 0.5, -11)
+            local knobPos = state and UDim2.new(0, 21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
             tween:Create(toggleSwitch, TweenInfo.new(0.15), {BackgroundColor3 = bgColor}):Play()
             tween:Create(switchKnob, TweenInfo.new(0.15), {Position = knobPos}):Play()
         end
@@ -338,7 +335,7 @@ local function createMainUI()
     
     local function makeButton(name, text, order, callback, parent)
         local button = Instance.new("TextButton")
-        button.Size = UDim2.new(1, 0, 0, isMobile and 44 or 36)
+        button.Size = UDim2.new(1, 0, 0, isMobile and 36 or 32)
         button.BackgroundColor3 = Color3.fromRGB(70, 180, 90)
         button.BorderSizePixel = 0
         button.Text = text
@@ -356,7 +353,6 @@ local function createMainUI()
         return button
     end
 
-    -- Rest of UI creation code remains the same as before...
     -- [Farm Tab]
     local farmTab = tabFrames["Farm"]
     makeToggle("AutoIdleToggle", "Auto Idle Pets", 1, farmTab)
@@ -403,7 +399,7 @@ local function createMainUI()
     makeToggle("AutoShovelFruitsToggle", "Auto Shovel Fruits", 1, shovelTab)
     
     local thresholdFrame = Instance.new("Frame")
-    thresholdFrame.Size = UDim2.new(1, 0, 0, isMobile and 44 or 36)
+    thresholdFrame.Size = UDim2.new(1, 0, 0, isMobile and 36 or 32)
     thresholdFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
     thresholdFrame.LayoutOrder = 2
     thresholdFrame.Parent = shovelTab
@@ -414,11 +410,11 @@ local function createMainUI()
     
     local thresholdLabel = Instance.new("TextLabel")
     thresholdLabel.Size = UDim2.new(0.4, 0, 1, 0)
-    thresholdLabel.Position = UDim2.new(0, 16, 0, 0)
+    thresholdLabel.Position = UDim2.new(0, 12, 0, 0)
     thresholdLabel.BackgroundTransparency = 1
     thresholdLabel.Text = "Weight Threshold:"
     thresholdLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-    thresholdLabel.TextSize = isMobile and 13 or 14
+    thresholdLabel.TextSize = isMobile and 12 or 12
     thresholdLabel.TextXAlignment = Enum.TextXAlignment.Left
     thresholdLabel.Font = Enum.Font.Gotham
     thresholdLabel.Parent = thresholdFrame
@@ -445,7 +441,7 @@ local function createMainUI()
     typeButton.BorderSizePixel = 0
     typeButton.Text = config.ThresholdType
     typeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    typeButton.TextSize = isMobile and 13 or 14
+    typeButton.TextSize = isMobile and 12 or 12
     typeButton.Font = Enum.Font.Gotham
     typeButton.Parent = thresholdFrame
     
@@ -474,7 +470,7 @@ local function createMainUI()
     selectedLabel.BackgroundTransparency = 1
     selectedLabel.Text = "Selected: " .. (#config.SelectedPlants > 0 and table.concat(config.SelectedPlants, ", ") or "None")
     selectedLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-    selectedLabel.TextSize = isMobile and 12 or 12
+    selectedLabel.TextSize = isMobile and 11 or 11
     selectedLabel.TextXAlignment = Enum.TextXAlignment.Left
     selectedLabel.LayoutOrder = 3
     selectedLabel.Parent = shovelTab
@@ -490,7 +486,7 @@ local function createMainUI()
     plantContainer.Parent = shovelTab
     
     local searchBox = Instance.new("TextBox")
-    searchBox.Size = UDim2.new(1, 0, 0, isMobile and 36 or 30)
+    searchBox.Size = UDim2.new(1, 0, 0, isMobile and 34 or 30)
     searchBox.PlaceholderText = "Search plants..."
     searchBox.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
     searchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -512,7 +508,7 @@ local function createMainUI()
     scrollFrame.Parent = plantContainer
     
     local plantGrid = Instance.new("UIGridLayout")
-    plantGrid.CellSize = UDim2.new(0.5, -4, 0, isMobile and 36 or 30)
+    plantGrid.CellSize = UDim2.new(0.5, -4, 0, isMobile and 30 or 28)
     plantGrid.CellPadding = UDim2.new(0, 0, 0, 4)
     plantGrid.HorizontalAlignment = Enum.HorizontalAlignment.Center
     plantGrid.Parent = scrollFrame
@@ -528,14 +524,14 @@ local function createMainUI()
         for _, plant in ipairs(plantTypes) do
             if search == "" or string.find(string.lower(plant), string.lower(search)) then
                 local plantBtn = Instance.new("TextButton")
-                plantBtn.Size = UDim2.new(1, 0, 0, isMobile and 36 or 30)
+                plantBtn.Size = UDim2.new(1, 0, 0, isMobile and 30 or 28)
                 plantBtn.BackgroundColor3 = table.find(config.SelectedPlants, plant) 
                     and Color3.fromRGB(70, 180, 90) 
                     or Color3.fromRGB(50, 50, 55)
                 plantBtn.BorderSizePixel = 0
                 plantBtn.Text = plant
                 plantBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-                plantBtn.TextSize = isMobile and 13 or 12
+                plantBtn.TextSize = isMobile and 11 or 11
                 plantBtn.Font = Enum.Font.Gotham
                 plantBtn.Parent = scrollFrame
                 
@@ -584,71 +580,177 @@ local function createMainUI()
         saveConfig()
         showNotification("Settings", "All settings reset")
         task.wait(0.5)
-        if screenUI then screenUI:Destroy() end
-        loadfile("FarmHelper.lua")()
+        if gui then gui:Destroy() end
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/yourusername/FarmHelper/main/FarmHelper.lua"))()
     end, settingsTab)
     
     makeButton("reload", "Reload UI", 2, function()
         running = false
-        if screenUI then screenUI:Destroy() end
+        if gui then gui:Destroy() end
         task.wait(0.5)
-        loadfile("FarmHelper.lua")()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/yourusername/FarmHelper/main/FarmHelper.lua"))()
     end, settingsTab)
     
-    -- UI Interaction
+    -- Floating toggle button (minimized state)
+    local floatingBtn = Instance.new("TextButton")
+    floatingBtn.Name = "FloatingButton"
+    floatingBtn.Size = UDim2.new(0, isMobile and 50 or 45, 0, isMobile and 50 or 45)
+    floatingBtn.Position = UDim2.new(0, 20, 0.4, 0) -- Left side, slightly above center
+    floatingBtn.AnchorPoint = Vector2.new(0, 0.4)
+    floatingBtn.BackgroundColor3 = Color3.fromRGB(52, 168, 83)
+    floatingBtn.BorderSizePixel = 0
+    floatingBtn.Text = isMobile and "🌾" or "🌾"
+    floatingBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    floatingBtn.TextSize = isMobile and 24 or 20
+    floatingBtn.Font = Enum.Font.GothamBold
+    floatingBtn.Parent = gui
+    floatingBtn.Visible = false
+
+    local floatingBtnCorner = Instance.new("UICorner")
+    floatingBtnCorner.CornerRadius = UDim.new(0.5, 0)
+    floatingBtnCorner.Parent = floatingBtn
+
+    -- Shadow effect
+    local shadow = Instance.new("Frame")
+    shadow.Name = "Shadow"
+    shadow.Size = UDim2.new(1, 6, 1, 6)
+    shadow.Position = UDim2.new(0, -3, 0, -3)
+    shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    shadow.BackgroundTransparency = 0.8
+    shadow.BorderSizePixel = 0
+    shadow.ZIndex = floatingBtn.ZIndex - 1
+    shadow.Parent = floatingBtn
+
+    local shadowCorner = Instance.new("UICorner")
+    shadowCorner.CornerRadius = UDim.new(0.5, 0)
+    shadowCorner.Parent = shadow
+
+    local isMinimized = false
+
+    -- Minimize/Restore functionality
+    local function toggleMinimize()
+        isMinimized = not isMinimized
+
+        if isMinimized then
+            tween:Create(mainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+                Size = UDim2.new(0, 0, 0, 0)
+            }):Play()
+
+            task.wait(0.3)
+            mainFrame.Visible = false
+            floatingBtn.Visible = true
+
+            floatingBtn.Size = UDim2.new(0, 0, 0, 0)
+            tween:Create(floatingBtn, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+                Size = UDim2.new(0, isMobile and 50 or 45, 0, isMobile and 50 or 45)
+            }):Play()
+        else
+            tween:Create(floatingBtn, TweenInfo.new(0.2), {
+                Size = UDim2.new(0, 0, 0, 0)
+            }):Play()
+
+            task.wait(0.2)
+            floatingBtn.Visible = false
+            mainFrame.Visible = true
+
+            mainFrame.Size = UDim2.new(0, 0, 0, 0)
+            if isMobile then
+                tween:Create(mainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+                    Size = UDim2.new(0.75, 0, 0.7, 0)
+                }):Play()
+            else
+                tween:Create(mainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back), {
+                    Size = UDim2.new(0, 300, 0, 450)
+                }):Play()
+            end
+        end
+    end
+
+    -- Close button
     closeBtn.MouseButton1Click:Connect(function()
         running = false
-        screenUI:Destroy()
+        gui:Destroy()
     end)
-    
-    minimizeBtn.MouseButton1Click:Connect(function()
-        mainFrame.Visible = not mainFrame.Visible
+
+    -- Minimize button
+    minimizeBtn.MouseButton1Click:Connect(toggleMinimize)
+
+    -- Floating button
+    floatingBtn.MouseButton1Click:Connect(toggleMinimize)
+
+    -- Button hover effects
+    closeBtn.MouseEnter:Connect(function()
+        tween:Create(closeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 89, 89)}):Play()
     end)
-    
+
+    closeBtn.MouseLeave:Connect(function()
+        tween:Create(closeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 69, 69)}):Play()
+    end)
+
+    minimizeBtn.MouseEnter:Connect(function()
+        tween:Create(minimizeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 213, 47)}):Play()
+    end)
+
+    minimizeBtn.MouseLeave:Connect(function()
+        tween:Create(minimizeBtn, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(255, 193, 7)}):Play()
+    end)
+
+    floatingBtn.MouseEnter:Connect(function()
+        tween:Create(floatingBtn, TweenInfo.new(0.15), {
+            BackgroundColor3 = Color3.fromRGB(62, 185, 96),
+            Size = UDim2.new(0, isMobile and 55 or 50, 0, isMobile and 55 or 50)
+        }):Play()
+    end)
+
+    floatingBtn.MouseLeave:Connect(function()
+        tween:Create(floatingBtn, TweenInfo.new(0.15), {
+            BackgroundColor3 = Color3.fromRGB(52, 168, 83),
+            Size = UDim2.new(0, isMobile and 50 or 45, 0, isMobile and 50 or 45)
+        }):Play()
+    end)
+
+    -- Dragging functionality
     local dragging = false
     local dragStart = nil
     local startPos = nil
-    
-    -- Mobile-friendly dragging
+
     header.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or 
-           input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
             startPos = mainFrame.Position
         end
     end)
-    
+
     input.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or 
-                        input.UserInputType == Enum.UserInputType.Touch) then
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local delta = input.Position - dragStart
-            mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, 
-                                          startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
-    
+
     input.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or 
-           input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = false
         end
     end)
     
-    input.InputBegan:Connect(function(input)
-        if input.KeyCode == Enum.KeyCode.Insert then
-            mainFrame.Visible = not mainFrame.Visible
-        end
-    end)
-    
-    return screenUI
+    -- Insert key only for PC
+    if not isMobile then
+        input.InputBegan:Connect(function(input)
+            if input.KeyCode == Enum.KeyCode.Insert then
+                toggleMinimize()
+            end
+        end)
+    end
+
+    return gui
 end
 
 local mainUI = createMainUI()
 getgenv().FarmHelper = mainUI
-showNotification("Farm Assistant", "Press Insert to toggle UI")
+showNotification("Farm Assistant", isMobile and "Tap 🌾 to toggle UI" or "Press Insert or tap 🌾 to toggle UI")
 
--- Rest of the script remains the same...
 -- [Auto Idle Pets]
 getgenv().AutoIdle = false
 getgenv().AutoIdleToggle = config.AutoIdleToggle
