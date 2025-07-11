@@ -134,67 +134,86 @@ local function createMainUI()
     screenUI.Parent = player.PlayerGui
     screenUI.ResetOnSpawn = false
     screenUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    
+    -- Mobile-friendly dimensions
     local mainFrame = Instance.new("Frame")
-    mainFrame.Size = UDim2.new(0, 320, 0, 400)
-    mainFrame.Position = UDim2.new(0.5, -160, 0.5, -200)
+    if isMobile then
+        mainFrame.Size = UDim2.new(0.85, 0, 0.6, 0)
+    else
+        mainFrame.Size = UDim2.new(0, 320, 0, 400)
+    end
+    mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     mainFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 32)
+    mainFrame.BackgroundTransparency = 0.1  -- Translucent background
     mainFrame.BorderSizePixel = 0
     mainFrame.Parent = screenUI
+    
     local mainCorner = Instance.new("UICorner")
     mainCorner.CornerRadius = UDim.new(0, 12)
     mainCorner.Parent = mainFrame
+    
     local header = Instance.new("Frame")
-    header.Size = UDim2.new(1, 0, 0, 50)
+    header.Size = UDim2.new(1, 0, 0, isMobile and 60 or 50)
     header.BackgroundTransparency = 1
     header.Parent = mainFrame
+    
     local title = Instance.new("TextLabel")
     title.Size = UDim2.new(1, -100, 1, 0)
     title.Position = UDim2.new(0, 20, 0, 0)
     title.BackgroundTransparency = 1
     title.Text = "Farm Assistant"
     title.TextColor3 = Color3.fromRGB(240, 240, 240)
-    title.TextSize = 18
+    title.TextSize = isMobile and 16 or 18
     title.TextXAlignment = Enum.TextXAlignment.Left
     title.Font = Enum.Font.GothamBold
     title.Parent = header
+    
     local closeBtn = Instance.new("TextButton")
-    closeBtn.Size = UDim2.new(0, 32, 0, 32)
+    closeBtn.Size = UDim2.new(0, isMobile and 44 or 32, 0, isMobile and 44 or 32)
     closeBtn.Position = UDim2.new(1, -45, 0, 9)
     closeBtn.BackgroundColor3 = Color3.fromRGB(220, 60, 60)
     closeBtn.BorderSizePixel = 0
     closeBtn.Text = "×"
     closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    closeBtn.TextSize = 18
+    closeBtn.TextSize = isMobile and 16 or 18
     closeBtn.Font = Enum.Font.GothamBold
     closeBtn.Parent = header
+    
     local closeCorner = Instance.new("UICorner")
     closeCorner.CornerRadius = UDim.new(0, 8)
     closeCorner.Parent = closeBtn
+    
     local minimizeBtn = Instance.new("TextButton")
-    minimizeBtn.Size = UDim2.new(0, 32, 0, 32)
-    minimizeBtn.Position = UDim2.new(1, -82, 0, 9)
+    minimizeBtn.Size = UDim2.new(0, isMobile and 44 or 32, 0, isMobile and 44 or 32)
+    minimizeBtn.Position = UDim2.new(1, isMobile and -94 or -82, 0, 9)
     minimizeBtn.BackgroundColor3 = Color3.fromRGB(240, 180, 50)
     minimizeBtn.BorderSizePixel = 0
     minimizeBtn.Text = "—"
     minimizeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    minimizeBtn.TextSize = 18
+    minimizeBtn.TextSize = isMobile and 16 or 18
     minimizeBtn.Font = Enum.Font.GothamBold
     minimizeBtn.Parent = header
+    
     local minimizeCorner = Instance.new("UICorner")
     minimizeCorner.CornerRadius = UDim.new(0, 8)
     minimizeCorner.Parent = minimizeBtn
+    
     local tabs = {"Farm", "Shop", "Shovel", "Settings"}
     local tabButtons = {}
     local tabFrames = {}
+    
     local tabContainer = Instance.new("Frame")
-    tabContainer.Size = UDim2.new(1, -24, 0, 36)
-    tabContainer.Position = UDim2.new(0, 12, 0, 58)
+    tabContainer.Size = UDim2.new(1, -24, 0, isMobile and 44 or 36)
+    tabContainer.Position = UDim2.new(0, 12, 0, isMobile and 68 or 58)
     tabContainer.BackgroundTransparency = 1
     tabContainer.Parent = mainFrame
+    
     local tabLayout = Instance.new("UIListLayout")
     tabLayout.FillDirection = Enum.FillDirection.Horizontal
     tabLayout.Padding = UDim.new(0, 6)
     tabLayout.Parent = tabContainer
+    
     for i, tabName in ipairs(tabs) do
         local tabBtn = Instance.new("TextButton")
         tabBtn.Size = UDim2.new(0.25, -6, 1, 0)
@@ -202,7 +221,7 @@ local function createMainUI()
         tabBtn.BorderSizePixel = 0
         tabBtn.Text = tabName
         tabBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
-        tabBtn.TextSize = 14
+        tabBtn.TextSize = isMobile and 13 or 14
         tabBtn.Font = Enum.Font.Gotham
         tabBtn.Parent = tabContainer
         
@@ -224,8 +243,13 @@ local function createMainUI()
         tabButtons[tabName] = tabBtn
         
         local tabFrame = Instance.new("ScrollingFrame")
-        tabFrame.Size = UDim2.new(1, -24, 1, -100)
-        tabFrame.Position = UDim2.new(0, 12, 0, 100)
+        if isMobile then
+            tabFrame.Size = UDim2.new(1, -24, 1, -120)
+            tabFrame.Position = UDim2.new(0, 12, 0, 120)
+        else
+            tabFrame.Size = UDim2.new(1, -24, 1, -100)
+            tabFrame.Position = UDim2.new(0, 12, 0, 100)
+        end
         tabFrame.BackgroundTransparency = 1
         tabFrame.Visible = i == 1
         tabFrame.ScrollBarThickness = 4
@@ -240,56 +264,66 @@ local function createMainUI()
         
         tabFrames[tabName] = tabFrame
     end
+    
     local function makeToggle(name, text, order, parent)
         local toggleFrame = Instance.new("Frame")
-        toggleFrame.Size = UDim2.new(1, 0, 0, 36)
+        toggleFrame.Size = UDim2.new(1, 0, 0, isMobile and 44 or 36)
         toggleFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
         toggleFrame.BorderSizePixel = 0
         toggleFrame.LayoutOrder = order
         toggleFrame.Parent = parent
+        
         local toggleCorner = Instance.new("UICorner")
         toggleCorner.CornerRadius = UDim.new(0, 8)
         toggleCorner.Parent = toggleFrame
+        
         local toggleLabel = Instance.new("TextLabel")
         toggleLabel.Size = UDim2.new(1, -60, 1, 0)
         toggleLabel.Position = UDim2.new(0, 16, 0, 0)
         toggleLabel.BackgroundTransparency = 1
         toggleLabel.Text = text
         toggleLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-        toggleLabel.TextSize = 14
+        toggleLabel.TextSize = isMobile and 13 or 14
         toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
         toggleLabel.Font = Enum.Font.Gotham
         toggleLabel.Parent = toggleFrame
+        
         local toggleSwitch = Instance.new("Frame")
-        toggleSwitch.Size = UDim2.new(0, 44, 0, 24)
-        toggleSwitch.Position = UDim2.new(1, -56, 0.5, -12)
+        toggleSwitch.Size = UDim2.new(0, isMobile and 50 or 44, 0, isMobile and 28 or 24)
+        toggleSwitch.Position = UDim2.new(1, -56, 0.5, -14)
         toggleSwitch.BackgroundColor3 = Color3.fromRGB(70, 70, 75)
         toggleSwitch.BorderSizePixel = 0
         toggleSwitch.Parent = toggleFrame
+        
         local switchCorner = Instance.new("UICorner")
         switchCorner.CornerRadius = UDim.new(0, 12)
         switchCorner.Parent = toggleSwitch
+        
         local switchKnob = Instance.new("Frame")
-        switchKnob.Size = UDim2.new(0, 18, 0, 18)
-        switchKnob.Position = UDim2.new(0, 3, 0.5, -9)
+        switchKnob.Size = UDim2.new(0, isMobile and 22 or 18, 0, isMobile and 22 or 18)
+        switchKnob.Position = UDim2.new(0, 3, 0.5, -11)
         switchKnob.BackgroundColor3 = Color3.fromRGB(250, 250, 250)
         switchKnob.BorderSizePixel = 0
         switchKnob.Parent = toggleSwitch
+        
         local knobCorner = Instance.new("UICorner")
-        knobCorner.CornerRadius = UDim.new(0, 9)
+        knobCorner.CornerRadius = UDim.new(0, 11)
         knobCorner.Parent = switchKnob
+        
         local switchButton = Instance.new("TextButton")
         switchButton.Size = UDim2.new(1, 0, 1, 0)
         switchButton.BackgroundTransparency = 1
         switchButton.Text = ""
         switchButton.Parent = toggleSwitch
+        
         local state = config[name] or false
         local function updateToggle()
             local bgColor = state and Color3.fromRGB(70, 180, 90) or Color3.fromRGB(70, 70, 75)
-            local knobPos = state and UDim2.new(0, 23, 0.5, -9) or UDim2.new(0, 3, 0.5, -9)
+            local knobPos = state and UDim2.new(0, 25, 0.5, -11) or UDim2.new(0, 3, 0.5, -11)
             tween:Create(toggleSwitch, TweenInfo.new(0.15), {BackgroundColor3 = bgColor}):Play()
             tween:Create(switchKnob, TweenInfo.new(0.15), {Position = knobPos}):Play()
         end
+        
         updateToggle()
         switchButton.MouseButton1Click:Connect(function()
             state = not state
@@ -298,25 +332,32 @@ local function createMainUI()
             saveConfig()
             showNotification("Settings", text .. " " .. (state and "enabled" or "disabled"))
         end)
+        
         return toggleFrame
     end
+    
     local function makeButton(name, text, order, callback, parent)
         local button = Instance.new("TextButton")
-        button.Size = UDim2.new(1, 0, 0, 36)
+        button.Size = UDim2.new(1, 0, 0, isMobile and 44 or 36)
         button.BackgroundColor3 = Color3.fromRGB(70, 180, 90)
         button.BorderSizePixel = 0
         button.Text = text
         button.TextColor3 = Color3.fromRGB(255, 255, 255)
-        button.TextSize = 14
+        button.TextSize = isMobile and 14 or 14
         button.Font = Enum.Font.GothamBold
         button.LayoutOrder = order
         button.Parent = parent
+        
         local buttonCorner = Instance.new("UICorner")
         buttonCorner.CornerRadius = UDim.new(0, 8)
         buttonCorner.Parent = button
+        
         button.MouseButton1Click:Connect(callback)
         return button
     end
+
+    -- Rest of UI creation code remains the same as before...
+    -- [Farm Tab]
     local farmTab = tabFrames["Farm"]
     makeToggle("AutoIdleToggle", "Auto Idle Pets", 1, farmTab)
     makeToggle("notify", "Show Notifications", 2, farmTab)
@@ -350,15 +391,19 @@ local function createMainUI()
         putAwayShovel()
         showNotification("Done", "Sprinklers removed")
     end, farmTab)
+    
+    -- [Shop Tab]
     local shopTab = tabFrames["Shop"]
     makeToggle("AutoBuySeeds", "Auto Buy Seeds", 1, shopTab)
     makeToggle("AutoBuyGear", "Auto Buy Gear", 2, shopTab)
     makeToggle("AutoBuyEggs", "Auto Buy Eggs", 3, shopTab)
+    
+    -- [Shovel Tab]
     local shovelTab = tabFrames["Shovel"]
     makeToggle("AutoShovelFruitsToggle", "Auto Shovel Fruits", 1, shovelTab)
     
     local thresholdFrame = Instance.new("Frame")
-    thresholdFrame.Size = UDim2.new(1, 0, 0, 36)
+    thresholdFrame.Size = UDim2.new(1, 0, 0, isMobile and 44 or 36)
     thresholdFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
     thresholdFrame.LayoutOrder = 2
     thresholdFrame.Parent = shovelTab
@@ -373,7 +418,7 @@ local function createMainUI()
     thresholdLabel.BackgroundTransparency = 1
     thresholdLabel.Text = "Weight Threshold:"
     thresholdLabel.TextColor3 = Color3.fromRGB(220, 220, 220)
-    thresholdLabel.TextSize = 14
+    thresholdLabel.TextSize = isMobile and 13 or 14
     thresholdLabel.TextXAlignment = Enum.TextXAlignment.Left
     thresholdLabel.Font = Enum.Font.Gotham
     thresholdLabel.Parent = thresholdFrame
@@ -385,7 +430,7 @@ local function createMainUI()
     thresholdBox.BorderSizePixel = 0
     thresholdBox.Text = tostring(config.WeightThreshold)
     thresholdBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    thresholdBox.TextSize = 14
+    thresholdBox.TextSize = isMobile and 14 or 14
     thresholdBox.Font = Enum.Font.Gotham
     thresholdBox.Parent = thresholdFrame
     
@@ -400,7 +445,7 @@ local function createMainUI()
     typeButton.BorderSizePixel = 0
     typeButton.Text = config.ThresholdType
     typeButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-    typeButton.TextSize = 14
+    typeButton.TextSize = isMobile and 13 or 14
     typeButton.Font = Enum.Font.Gotham
     typeButton.Parent = thresholdFrame
     
@@ -429,7 +474,7 @@ local function createMainUI()
     selectedLabel.BackgroundTransparency = 1
     selectedLabel.Text = "Selected: " .. (#config.SelectedPlants > 0 and table.concat(config.SelectedPlants, ", ") or "None")
     selectedLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
-    selectedLabel.TextSize = 12
+    selectedLabel.TextSize = isMobile and 12 or 12
     selectedLabel.TextXAlignment = Enum.TextXAlignment.Left
     selectedLabel.LayoutOrder = 3
     selectedLabel.Parent = shovelTab
@@ -445,11 +490,11 @@ local function createMainUI()
     plantContainer.Parent = shovelTab
     
     local searchBox = Instance.new("TextBox")
-    searchBox.Size = UDim2.new(1, 0, 0, 30)
+    searchBox.Size = UDim2.new(1, 0, 0, isMobile and 36 or 30)
     searchBox.PlaceholderText = "Search plants..."
     searchBox.BackgroundColor3 = Color3.fromRGB(50, 50, 55)
     searchBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    searchBox.TextSize = 14
+    searchBox.TextSize = isMobile and 14 or 14
     searchBox.Font = Enum.Font.Gotham
     searchBox.Parent = plantContainer
     
@@ -467,7 +512,7 @@ local function createMainUI()
     scrollFrame.Parent = plantContainer
     
     local plantGrid = Instance.new("UIGridLayout")
-    plantGrid.CellSize = UDim2.new(0.5, -4, 0, 30)
+    plantGrid.CellSize = UDim2.new(0.5, -4, 0, isMobile and 36 or 30)
     plantGrid.CellPadding = UDim2.new(0, 0, 0, 4)
     plantGrid.HorizontalAlignment = Enum.HorizontalAlignment.Center
     plantGrid.Parent = scrollFrame
@@ -483,14 +528,14 @@ local function createMainUI()
         for _, plant in ipairs(plantTypes) do
             if search == "" or string.find(string.lower(plant), string.lower(search)) then
                 local plantBtn = Instance.new("TextButton")
-                plantBtn.Size = UDim2.new(1, 0, 0, 30)
+                plantBtn.Size = UDim2.new(1, 0, 0, isMobile and 36 or 30)
                 plantBtn.BackgroundColor3 = table.find(config.SelectedPlants, plant) 
                     and Color3.fromRGB(70, 180, 90) 
                     or Color3.fromRGB(50, 50, 55)
                 plantBtn.BorderSizePixel = 0
                 plantBtn.Text = plant
                 plantBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-                plantBtn.TextSize = 12
+                plantBtn.TextSize = isMobile and 13 or 12
                 plantBtn.Font = Enum.Font.Gotham
                 plantBtn.Parent = scrollFrame
                 
@@ -521,6 +566,7 @@ local function createMainUI()
     
     refreshPlantList("")
     
+    -- [Settings Tab]
     local settingsTab = tabFrames["Settings"]
     makeButton("reset", "Reset All Settings", 1, function()
         config = {
@@ -548,46 +594,65 @@ local function createMainUI()
         task.wait(0.5)
         loadfile("FarmHelper.lua")()
     end, settingsTab)
+    
+    -- UI Interaction
     closeBtn.MouseButton1Click:Connect(function()
         running = false
         screenUI:Destroy()
     end)
+    
     minimizeBtn.MouseButton1Click:Connect(function()
         mainFrame.Visible = not mainFrame.Visible
     end)
+    
     local dragging = false
     local dragStart = nil
     local startPos = nil
+    
+    -- Mobile-friendly dragging
     header.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+           input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
             startPos = mainFrame.Position
         end
     end)
+    
     input.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or 
+                        input.UserInputType == Enum.UserInputType.Touch) then
             local delta = input.Position - dragStart
-            mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, 
+                                          startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
+    
     input.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or 
+           input.UserInputType == Enum.UserInputType.Touch then
             dragging = false
         end
     end)
+    
     input.InputBegan:Connect(function(input)
         if input.KeyCode == Enum.KeyCode.Insert then
             mainFrame.Visible = not mainFrame.Visible
         end
     end)
+    
     return screenUI
 end
+
 local mainUI = createMainUI()
 getgenv().FarmHelper = mainUI
 showNotification("Farm Assistant", "Press Insert to toggle UI")
+
+-- Rest of the script remains the same...
+-- [Auto Idle Pets]
 getgenv().AutoIdle = false
 getgenv().AutoIdleToggle = config.AutoIdleToggle
+
 task.spawn(function()
     while running do
         if getgenv().AutoIdle then
@@ -603,6 +668,7 @@ task.spawn(function()
         task.wait()
     end
 end)
+
 task.spawn(function()
     while running do
         if getgenv().AutoIdleToggle then 
@@ -633,6 +699,8 @@ task.spawn(function()
         task.wait(1)
     end
 end)
+
+-- [Auto Buy Features]
 task.spawn(function()
     while running do
         if config.AutoBuySeeds then
@@ -646,6 +714,7 @@ task.spawn(function()
         end
     end
 end)
+
 task.spawn(function()
     while running do
         if config.AutoBuyGear then
@@ -659,6 +728,7 @@ task.spawn(function()
         end
     end
 end)
+
 task.spawn(function()
     while running do
         if config.AutoBuyEggs then
@@ -672,6 +742,8 @@ task.spawn(function()
         end
     end
 end)
+
+-- [Auto Shovel Fruits]
 task.spawn(function()
     while running do
         if config.AutoShovelFruitsToggle and #config.SelectedPlants > 0 then
@@ -686,6 +758,7 @@ task.spawn(function()
                             local fruits = plant:FindFirstChild("Fruits")
                             if fruits then
                                 for _, fruit in ipairs(fruits:GetChildren()) do
+                                    -- Skip shovel if fruit is favorited
                                     if fruit:GetAttribute("Favorited") == true then
                                         continue
                                     end
@@ -721,6 +794,8 @@ task.spawn(function()
         task.wait(5)
     end
 end)
+
+-- [Fruit Weight Display]
 task.spawn(function()
     local weightDisplay = Instance.new("ScreenGui")
     weightDisplay.Name = "FruitWeightDisplay"
